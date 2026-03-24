@@ -36,6 +36,7 @@ struct ExerciseDetailView: View {
     let exercise: Exercise
     @State private var timeRemaining: Int
     @State private var timerActive = false
+    @State private var timerCompleted = false
     @State private var showingTips = false
     @State private var audioEnabled = true
     
@@ -79,20 +80,21 @@ struct ExerciseDetailView: View {
                         UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     }) {
                         Label(timerActive ? "Pause" : "Start", systemImage: timerActive ? "pause.fill" : "play.fill")
-                            .buttonStyle(.borderedProminent)
-                            .tint(.blue)
                     }
-                    
+                    .buttonStyle(.borderedProminent)
+                    .tint(.blue)
+
                     Button(action: {
                         timeRemaining = exercise.durationSeconds
                         timerActive = false
+                        timerCompleted = false
                         UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
                         TTSManager.shared.stop()
                     }) {
                         Image(systemName: "arrow.clockwise")
-                            .buttonStyle(.bordered)
-                            .tint(.secondary)
                     }
+                    .buttonStyle(.bordered)
+                    .tint(.secondary)
                 }
                 
                 VStack(alignment: .leading, spacing: 15) {
@@ -134,8 +136,9 @@ struct ExerciseDetailView: View {
             if timerActive && timeRemaining > 0 {
                 timeRemaining -= 1
                 checkAudioCues()
-            } else if timeRemaining == 0 {
+            } else if timeRemaining == 0 && !timerCompleted {
                 timerActive = false
+                timerCompleted = true
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
                 if audioEnabled {
                     TTSManager.shared.speak("Exercise complete. Great job!")

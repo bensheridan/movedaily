@@ -137,25 +137,6 @@ struct DashboardView: View {
     }
 }
 
-extension UserProfile {
-    func completeRoutine() {
-        let today = Calendar.current.startOfDay(for: Date())
-        let lastDate = lastExerciseDate != nil ? Calendar.current.startOfDay(for: lastExerciseDate!) : nil
-
-        xp += 20
-        if xp >= 100 {
-            level += 1
-            xp -= 100
-        }
-
-        if lastDate == nil || today > lastDate! {
-            streakCount += 1
-        }
-
-        lastExerciseDate = Date()
-    }
-}
-
 struct DailyRoutineCard: View {
     let routine: Routine
 
@@ -199,6 +180,7 @@ struct DailyRoutineCard: View {
         )
         .cornerRadius(20)
         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+        .environment(\.colorScheme, .dark)
     }
 }
 
@@ -215,11 +197,6 @@ struct HeaderView: View {
                     .font(.title)
                     .fontWeight(.bold)
             }
-            Spacer()
-            Image(systemName: "person.circle.fill")
-                .resizable()
-                .frame(width: 40, height: 40)
-                .foregroundColor(.accentColor)
         }
         .padding()
     }
@@ -250,6 +227,7 @@ struct CategoryCard: View {
         )
         .cornerRadius(20)
         .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
+        .environment(\.colorScheme, .dark)
     }
 }
 
@@ -290,7 +268,7 @@ struct StatItem: View {
         }
         .frame(maxWidth: .infinity)
         .padding()
-        .background(Color.white)
+        .background(Color(uiColor: .secondarySystemBackground))
         .cornerRadius(15)
         .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
     }

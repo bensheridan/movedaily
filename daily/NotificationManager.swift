@@ -30,6 +30,14 @@ class NotificationManager {
         center.add(request)
     }
     
+    func scheduleDailyReminder(at timeString: String) {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        guard let date = formatter.date(from: timeString) else { return }
+        let components = Calendar.current.dateComponents([.hour, .minute], from: date)
+        scheduleDailyReminder(at: components.hour ?? 8, minute: components.minute ?? 0)
+    }
+
     func removeReminder() {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["daily_reminder"])
     }

@@ -1,50 +1,156 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+SYNC IMPACT REPORT
+==================
+Version change: (unset / all-placeholder) → 1.0.0
+Bump rationale: Initial ratification — all placeholder tokens replaced with
+  project-specific values. Classified as MINOR (1.0.0) because this is first
+  substantive content; no prior version existed to compare against.
+
+Modified principles:
+  (none — all are new)
+
+Added sections:
+  - Core Principles (5 principles)
+  - Platform & Technical Standards
+  - Development Workflow
+  - Governance
+
+Removed sections:
+  (none)
+
+Templates reviewed:
+  ✅ .specify/templates/plan-template.md — "Constitution Check" section is
+     generic and compatible with the five principles defined here.
+  ✅ .specify/templates/spec-template.md — No principle-specific sections;
+     user-story and requirements structure aligns with Principle V (simplicity /
+     independent testability).
+  ✅ .specify/templates/tasks-template.md — Phase structure and [P] parallel
+     markers align with Principle V. No principle-driven task types need adding
+     at this time.
+  ✅ .specify/templates/constitution-template.md — Source template; no changes
+     required.
+
+Deferred TODOs:
+  None — all fields resolved from codebase inspection.
+-->
+
+# daily Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. SwiftUI-First
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+All UI MUST be implemented using SwiftUI components and layout primitives.
+UIKit is permitted only for system APIs that have no SwiftUI equivalent
+(e.g., `UIImagePickerController`, `AVSpeechSynthesizer` wrappers via
+`NSObject` subclasses). Every View MUST be independently previewable via
+`#Preview` or `PreviewProvider`. Views MUST access SwiftData through the
+`.modelContext` / `@Query` environment — never through manually threaded
+model containers.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### II. SwiftData for Persistence
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+All user-generated and app-seeded data MUST be stored via SwiftData `@Model`
+entities registered in `dailyApp.sharedModelContainer`. The following are
+PROHIBITED:
+- Direct CoreData stack usage (`NSPersistentContainer`, etc.)
+- `UserDefaults` for model-level data (flags and lightweight preferences are
+  acceptable)
+- Ad-hoc file-based storage for content that belongs in the data model
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+Every new `@Model` class MUST be added to the `Schema` in `dailyApp.swift`
+before use. Schema-breaking changes MUST be accompanied by a
+`SchemaMigrationPlan`.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+### III. Offline-First
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+All core features — browsing exercises, executing routines, tracking streaks
+and XP, and viewing the profile — MUST function without any network
+connectivity. Specifically:
+- Seed content MUST be bundled within the app target and inserted once on
+  first launch via `Exercise.seedInitialData(context:)`.
+- No network requests are permitted for core workout or routine functionality.
+- Notification scheduling and TTS audio MUST rely only on on-device system
+  frameworks (`UserNotifications`, `AVFoundation`).
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+### IV. Personalization Without Gatekeeping
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+Gender-personalized content (the `genderFocus` property on `Exercise`) is an
+OPTIONAL enhancement, not an access-control mechanism. The following rules
+MUST hold:
+- Gender-neutral exercises (where `genderFocus == nil`) MUST always be
+  available to every user regardless of profile settings.
+- Gendered exercises supplement the neutral set; they MUST NOT be the sole
+  option in any routine or category.
+- UI copy personalization (e.g., "Keep it up!" vs "Stay strong!") MUST fall
+  back gracefully to a neutral string when `gender == .unspecified`.
+
+### V. Simplicity & No Premature Abstraction
+
+The minimum viable structure for any feature is the correct starting point.
+The following rules apply:
+- View Models, Coordinators, Router patterns, or custom DI containers MUST
+  NOT be introduced unless a concrete, demonstrable problem cannot be solved
+  with SwiftUI's built-in `@Environment`, `@Query`, `@State`, and
+  `ObservableObject` patterns.
+- YAGNI applies: three concrete, clear implementations are preferred over one
+  speculative abstraction.
+- Any complexity beyond the minimum MUST be justified in the plan's
+  Complexity Tracking table before implementation begins.
+
+## Platform & Technical Standards
+
+- **Minimum deployment target**: iOS 17.0 (required by SwiftData).
+- **Language**: Swift 5.9+. No Objective-C files except auto-generated
+  bridging headers.
+- **Dependencies**: Zero third-party Swift Package Manager dependencies in
+  the current codebase. Any new SPM dependency MUST be discussed and approved
+  before being added; justify why a system framework cannot solve the problem.
+- **Audio**: `AVFoundation` / `AVSpeechSynthesizer` via `TTSManager` for all
+  text-to-speech. No third-party TTS libraries.
+- **Notifications**: `UserNotifications` framework only, via
+  `NotificationManager`. Notification identifiers MUST be stable string
+  constants, not inline literals.
+- **Testing**: `XCTest` for unit and UI tests. Test targets MUST use
+  `inMemory: true` model containers to avoid polluting persistent storage.
+
+## Development Workflow
+
+- Feature branches are numbered sequentially (per `.specify/init-options.json`
+  `branch_numbering: "sequential"`).
+- Every Swift view file that introduces a new `View` MUST include a
+  corresponding `#Preview` block.
+- When a new `@Model` type is created, registering it in
+  `dailyApp.sharedModelContainer`'s `Schema` is part of the same commit —
+  never deferred.
+- Commits MUST be made after each logically complete task unit (not batched
+  across multiple unrelated changes).
+- The `speckit` workflow governs feature specification: `speckit.specify` →
+  `speckit.plan` → `speckit.tasks` → `speckit.implement`.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution supersedes all prior oral conventions or ad-hoc practices.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Amendment procedure**:
+1. Open a branch and update `.specify/memory/constitution.md` with the
+   proposed change and a version bump per the semver rules below.
+2. Review the Sync Impact Report (HTML comment at top of file) to identify
+   dependent templates and update them in the same PR.
+3. Merge only after the author has verified no existing specs or plans
+   contradict the amended principle.
+
+**Versioning policy** (semantic versioning):
+- MAJOR: Backward-incompatible governance change, principle removal, or
+  redefinition that invalidates existing specs.
+- MINOR: New principle, new mandatory section, or materially expanded
+  guidance.
+- PATCH: Clarifications, wording improvements, typo fixes.
+
+**Compliance review**:
+- Every `speckit.plan` execution MUST include a "Constitution Check" gate
+  verifying the planned feature satisfies all five Core Principles.
+- Any violation MUST be documented in the plan's Complexity Tracking table
+  with justification before implementation.
+
+**Version**: 1.0.0 | **Ratified**: 2026-03-24 | **Last Amended**: 2026-03-24
