@@ -244,20 +244,20 @@ extension Exercise {
 
     private static func originalStretchingExercises() -> [Exercise] {
         [
-            Exercise(name: "Neck Tilts", exerciseDescription: "Forward, backward, and side-to-side tilts.", durationSeconds: 60, category: .stretching, instructions: ["Sit tall.", "Tilt head forward, then back.", "Tilt ear to shoulder on each side."], tips: ["Move slowly.", "Relax your shoulders."], audioCues: [0: "Tilt your head forward.", 15: "Now tilt it back.", 30: "Right side.", 45: "Left side."]),
-            Exercise(name: "Shoulder Rolls", exerciseDescription: "Roll shoulders forward and backward.", durationSeconds: 60, category: .stretching, instructions: ["Stand upright.", "Roll shoulders up and forward.", "Reverse the motion half-way through."], tips: ["Keep it smooth.", "Don't rush."], audioCues: [0: "Roll forward.", 30: "Now roll backward."]),
-            Exercise(name: "Chest Stretch (Doorway)", exerciseDescription: "Open your anterior shoulders.", durationSeconds: 60, category: .stretching, instructions: ["Stand in a doorway.", "Place forearms on the frame.", "Lean forward slightly."], tips: ["You should feel a stretch in your chest.", "Don't overextend."], audioCues: [0: "Place your arms on the frame.", 10: "Lean forward and hold."]),
-            Exercise(name: "Cat-Cow", exerciseDescription: "Spinal mobility on all fours.", durationSeconds: 60, category: .stretching, instructions: ["On all fours.", "Inhale, arch back.", "Exhale, round back."], tips: ["Move with your breath.", "Keep neck aligned."], audioCues: [0: "Inhale and arch.", 10: "Exhale and round."]),
-            Exercise(name: "Triceps Stretch", exerciseDescription: "Overhead arm pull.", durationSeconds: 60, category: .stretching, instructions: ["One arm overhead.", "Bend elbow.", "Pull elbow with other hand.", "Switch sides."], tips: ["Keep your chest upright.", "Don't push too hard."], audioCues: [0: "Right arm up.", 30: "Switch to left arm."]),
-            Exercise(name: "Side Reach Stretch", exerciseDescription: "Lateral torso stretch.", durationSeconds: 60, category: .stretching, instructions: ["Stand with feet apart.", "Reach one arm over head to the side.", "Switch sides."], tips: ["Feel the stretch in your obliques.", "Stay in control."], audioCues: [0: "Reach to the left.", 30: "Reach to the right."]),
-            Exercise(name: "Hamstring Stretch", exerciseDescription: "Seated or standing leg reach.", durationSeconds: 60, category: .stretching, instructions: ["Extend one leg.", "Hinge at hips.", "Reach for toes.", "Switch legs."], tips: ["Keep back flat.", "Lead with chest."], audioCues: [0: "Right leg forward.", 30: "Switch to left leg."]),
-            Exercise(name: "Quadriceps Stretch", exerciseDescription: "Standing leg pull.", durationSeconds: 60, category: .stretching, instructions: ["Stand on one leg.", "Pull other foot to glute.", "Switch legs."], tips: ["Keep knees together.", "Find a balance point."], audioCues: [0: "Right leg up.", 30: "Left leg up."]),
-            Exercise(name: "Calf Stretch", exerciseDescription: "Against a wall.", durationSeconds: 60, category: .stretching, instructions: ["Hands on wall.", "One leg back, heel down.", "Switch legs."], tips: ["Keep back leg straight.", "Push into the wall."], audioCues: [0: "Right leg back.", 30: "Left leg back."]),
-            Exercise(name: "Hip Flexor Stretch", exerciseDescription: "Lunge position stretch.", durationSeconds: 60, category: .stretching, instructions: ["Kneel on one knee.", "Lean forward into hips.", "Switch sides."], tips: ["Keep torso upright.", "Squeeze glute of back leg."], audioCues: [0: "Right knee down.", 30: "Left knee down."]),
-            Exercise(name: "Figure-4 Stretch", exerciseDescription: "Glute focus (Female focus).", durationSeconds: 60, category: .stretching, instructions: ["Lie on back.", "Cross ankle over knee.", "Pull knee to chest."], tips: ["Feel it in your glutes.", "Breathe through it."], audioCues: [0: "Cross your right leg.", 30: "Now switch legs."], genderFocus: .female),
-            Exercise(name: "Butterfly Stretch", exerciseDescription: "Inner thigh focus (Female focus).", durationSeconds: 60, category: .stretching, instructions: ["Sit with soles of feet together.", "Press knees down.", "Lean forward."], tips: ["Gentle pressure.", "Keep feet close."], audioCues: [0: "Press your knees down.", 30: "Lean forward slightly."], genderFocus: .female),
-            Exercise(name: "Child's Pose", exerciseDescription: "Lower back focus (Male focus).", durationSeconds: 60, category: .stretching, instructions: ["Kneel.", "Sit on heels.", "Reach forward."], tips: ["Widen knees if needed.", "Relax forehead."], audioCues: [0: "Reach forward and rest."], genderFocus: .male),
-            Exercise(name: "IT Band Stretch", exerciseDescription: "Lower body band stretch (Male focus).", durationSeconds: 60, category: .stretching, instructions: ["Cross one leg behind.", "Lean toward the same side.", "Switch."], tips: ["Feel it on the outer hip.", "Balance yourself."], audioCues: [0: "Lean to the right.", 30: "Lean to the left."], genderFocus: .male)
+            Exercise(name: "Neck Tilts", exerciseDescription: "Forward, backward, and side-to-side tilts.", durationSeconds: 60, category: .stretching, instructions: ["Sit tall.", "Tilt head forward, then back.", "Tilt ear to shoulder on each side."], tips: ["Move slowly.", "Relax your shoulders."], audioCues: [0: "Tilt your head forward gently.", 15: "Tilt it back slowly.", 30: "Right ear to right shoulder.", 45: "Left ear to left shoulder.", 50: "Almost there."]),
+            Exercise(name: "Shoulder Rolls", exerciseDescription: "Roll shoulders forward and backward.", durationSeconds: 60, category: .stretching, instructions: ["Stand upright.", "Roll shoulders up and forward.", "Reverse the motion half-way through."], tips: ["Keep it smooth.", "Don't rush."], audioCues: [0: "Roll both shoulders forward.", 15: "Big, slow circles.", 30: "Now roll backward.", 50: "Almost there."]),
+            Exercise(name: "Chest Stretch (Doorway)", exerciseDescription: "Open your anterior shoulders.", durationSeconds: 60, category: .stretching, instructions: ["Stand in a doorway.", "Place forearms on the frame.", "Lean forward slightly."], tips: ["You should feel a stretch in your chest.", "Don't overextend."], audioCues: [0: "Place forearms on the frame.", 10: "Lean forward — feel the stretch.", 30: "Breathe — let your chest open.", 50: "Almost there."]),
+            Exercise(name: "Cat-Cow", exerciseDescription: "Spinal mobility on all fours.", durationSeconds: 60, category: .stretching, instructions: ["On all fours.", "Inhale, arch back.", "Exhale, round back."], tips: ["Move with your breath.", "Keep neck aligned."], audioCues: [0: "Inhale — arch your back.", 10: "Exhale — round your spine.", 20: "Inhale — arch.", 30: "Exhale — round.", 40: "Inhale — arch again.", 50: "Exhale — round and rest."]),
+            Exercise(name: "Triceps Stretch", exerciseDescription: "Overhead arm pull.", durationSeconds: 60, category: .stretching, instructions: ["One arm overhead.", "Bend elbow.", "Pull elbow with other hand.", "Switch sides."], tips: ["Keep your chest upright.", "Don't push too hard."], audioCues: [0: "Right arm overhead, bend the elbow.", 15: "Relax into the stretch.", 30: "Switch to your left arm.", 50: "Almost there."]),
+            Exercise(name: "Side Reach Stretch", exerciseDescription: "Lateral torso stretch.", durationSeconds: 60, category: .stretching, instructions: ["Stand with feet apart.", "Reach one arm over head to the side.", "Switch sides."], tips: ["Feel the stretch in your obliques.", "Stay in control."], audioCues: [0: "Reach your left arm up and over.", 15: "Breathe into your side.", 30: "Switch — reach your right arm over.", 50: "Almost there."]),
+            Exercise(name: "Hamstring Stretch", exerciseDescription: "Seated or standing leg reach.", durationSeconds: 60, category: .stretching, instructions: ["Extend one leg.", "Hinge at hips.", "Reach for toes.", "Switch legs."], tips: ["Keep back flat.", "Lead with chest."], audioCues: [0: "Extend your right leg. Reach forward.", 15: "Breathe — let your chest lower.", 30: "Switch to your left leg.", 50: "Almost there."]),
+            Exercise(name: "Quadriceps Stretch", exerciseDescription: "Standing leg pull.", durationSeconds: 60, category: .stretching, instructions: ["Stand on one leg.", "Pull other foot to glute.", "Switch legs."], tips: ["Keep knees together.", "Find a balance point."], audioCues: [0: "Right leg — pull your foot to glute.", 15: "Knees together, find your balance.", 30: "Switch to your left leg.", 50: "Almost there."]),
+            Exercise(name: "Calf Stretch", exerciseDescription: "Against a wall.", durationSeconds: 60, category: .stretching, instructions: ["Hands on wall.", "One leg back, heel down.", "Switch legs."], tips: ["Keep back leg straight.", "Push into the wall."], audioCues: [0: "Right leg back, heel flat on floor.", 15: "Push your heel down — feel the stretch.", 30: "Switch to your left leg.", 50: "Almost there."]),
+            Exercise(name: "Hip Flexor Stretch", exerciseDescription: "Lunge position stretch.", durationSeconds: 60, category: .stretching, instructions: ["Kneel on one knee.", "Lean forward into hips.", "Switch sides."], tips: ["Keep torso upright.", "Squeeze glute of back leg."], audioCues: [0: "Right knee down, left foot forward.", 15: "Let your hips sink forward gently.", 30: "Switch to your left knee.", 50: "Almost there."]),
+            Exercise(name: "Figure-4 Stretch", exerciseDescription: "Glute focus (Female focus).", durationSeconds: 60, category: .stretching, instructions: ["Lie on back.", "Cross ankle over knee.", "Pull knee to chest."], tips: ["Feel it in your glutes.", "Breathe through it."], audioCues: [0: "Cross your right ankle over left knee.", 15: "Breathe into your hip — let it soften.", 30: "Switch — cross your left ankle over.", 50: "Almost there."], genderFocus: .female),
+            Exercise(name: "Butterfly Stretch", exerciseDescription: "Inner thigh focus (Female focus).", durationSeconds: 60, category: .stretching, instructions: ["Sit with soles of feet together.", "Press knees down.", "Lean forward."], tips: ["Gentle pressure.", "Keep feet close."], audioCues: [0: "Soles together. Press your knees down.", 15: "Let gravity open your hips gently.", 30: "Lean forward slightly.", 50: "Almost there."], genderFocus: .female),
+            Exercise(name: "Child's Pose", exerciseDescription: "Lower back focus (Male focus).", durationSeconds: 60, category: .stretching, instructions: ["Kneel.", "Sit on heels.", "Reach forward."], tips: ["Widen knees if needed.", "Relax forehead."], audioCues: [0: "Kneel and reach your arms forward.", 20: "Breathe into your back — let it expand.", 40: "Soften your hips toward your heels.", 50: "Almost there."], genderFocus: .male),
+            Exercise(name: "IT Band Stretch", exerciseDescription: "Lower body band stretch (Male focus).", durationSeconds: 60, category: .stretching, instructions: ["Cross one leg behind.", "Lean toward the same side.", "Switch."], tips: ["Feel it on the outer hip.", "Balance yourself."], audioCues: [0: "Cross your right leg behind. Lean right.", 15: "Feel the stretch along your outer hip.", 30: "Switch — cross your left leg. Lean left.", 50: "Almost there."], genderFocus: .male)
         ]
     }
 
@@ -282,10 +282,11 @@ extension Exercise {
                     "Breathe normally throughout."
                 ],
                 audioCues: [
-                    0: "Extend your right arm. Pull fingers down gently.",
-                    15: "Now flip your hand and pull fingers toward you.",
+                    0: "Extend your right arm. Pull fingers down.",
+                    15: "Flip hand — pull fingers toward you.",
                     30: "Switch to your left arm.",
-                    45: "Flip and stretch."
+                    45: "Flip and stretch the left side.",
+                    50: "Almost there."
                 ]
             ),
             Exercise(
@@ -308,7 +309,9 @@ extension Exercise {
                 ],
                 audioCues: [
                     0: "Right knee forward. Settle into the stretch.",
-                    30: "Switch to your left side."
+                    15: "Breathe into your hip — let it soften.",
+                    30: "Switch to your left side.",
+                    50: "Almost there."
                 ],
                 difficulty: .intermediate
             ),
@@ -331,8 +334,10 @@ extension Exercise {
                     "Breathe into the stretch."
                 ],
                 audioCues: [
-                    0: "Cross your right knee over. Twist to the right.",
-                    30: "Switch sides. Cross your left knee over."
+                    0: "Cross your right knee over. Twist right.",
+                    15: "Breathe — deepen the twist each exhale.",
+                    30: "Switch — cross your left knee. Twist left.",
+                    50: "Almost there."
                 ]
             )
         ]
@@ -344,14 +349,14 @@ extension Exercise {
 
     private static func originalBreathingExercises() -> [Exercise] {
         [
-            Exercise(name: "Belly Breathing", exerciseDescription: "Diaphragmatic focus.", durationSeconds: 180, category: .breathing, instructions: ["Hand on belly.", "Inhale, belly out.", "Exhale, belly in."], tips: ["Breathe deep.", "Relax chest."], audioCues: [0: "Hand on belly.", 5: "Inhale deep.", 10: "Long exhale."]),
-            Exercise(name: "4-7-8 Breathing", exerciseDescription: "Tranquilizing breath.", durationSeconds: 120, category: .breathing, instructions: ["Inhale 4s.", "Hold 7s.", "Exhale 8s."], tips: ["Make the whoosh sound.", "Keep tip of tongue on ridge."], audioCues: [0: "Inhale 4.", 4: "Hold 7.", 11: "Whoosh out 8."]),
-            Exercise(name: "Box Breathing", exerciseDescription: "Square breathing (4-4-4-4).", durationSeconds: 300, category: .breathing, instructions: ["Inhale 4s.", "Hold 4s.", "Exhale 4s.", "Hold 4s."], tips: ["Equal counts.", "Mental focus."], audioCues: [0: "Inhale 4.", 4: "Hold 4.", 8: "Exhale 4.", 12: "Hold 4."]),
-            Exercise(name: "Alternate Nostril Breathing", exerciseDescription: "Balance focus.", durationSeconds: 180, category: .breathing, instructions: ["Close one nostril.", "Inhale other.", "Switch nostrils.", "Exhale."], tips: ["Keep it gentle.", "Don't force."], audioCues: [0: "Close right, inhale left.", 10: "Close left, exhale right."]),
-            Exercise(name: "Pursed Lip Breathing", exerciseDescription: "Ease of breath.", durationSeconds: 120, category: .breathing, instructions: ["Inhale through nose.", "Exhale through pursed lips."], tips: ["Slow the exhale.", "Like blowing out a candle."], audioCues: [0: "Inhale nose.", 5: "Pursed lip exhale."]),
-            Exercise(name: "Resonant Breathing", exerciseDescription: "6 breaths per minute.", durationSeconds: 300, category: .breathing, instructions: ["5.5s inhale.", "5.5s exhale."], tips: ["Coherent rhythm.", "Steady flow."], audioCues: [0: "Inhale slowly.", 6: "Exhale slowly."]),
-            Exercise(name: "Gentle Breath Holds", exerciseDescription: "Body awareness.", durationSeconds: 120, category: .breathing, instructions: ["Inhale.", "Hold comfortably.", "Exhale."], tips: ["Don't push limits.", "Stay relaxed."], audioCues: [0: "Inhale.", 5: "Gentle hold.", 15: "Exhale."]),
-            Exercise(name: "Progressive Relaxation", exerciseDescription: "Deep rest.", durationSeconds: 300, category: .breathing, instructions: ["Tense and release muscles with breath."], tips: ["Start from toes.", "Work up to head."], audioCues: [0: "Relax your toes.", 30: "Relax your legs."])
+            Exercise(name: "Belly Breathing", exerciseDescription: "Diaphragmatic focus.", durationSeconds: 180, category: .breathing, instructions: ["Hand on belly.", "Inhale, belly out.", "Exhale, belly in."], tips: ["Breathe deep.", "Relax chest."], audioCues: [0: "Hand on belly. Sit comfortably.", 5: "Inhale — belly rises.", 9: "Exhale — belly falls.", 25: "Inhale deep.", 29: "Slow exhale.", 60: "Stay with the breath.", 90: "Inhale — fill your belly.", 120: "Exhale — let it go.", 170: "Last few seconds."]),
+            Exercise(name: "4-7-8 Breathing", exerciseDescription: "Tranquilizing breath.", durationSeconds: 120, category: .breathing, instructions: ["Inhale 4s.", "Hold 7s.", "Exhale 8s."], tips: ["Make the whoosh sound.", "Keep tip of tongue on ridge."], audioCues: [0: "Inhale — four counts.", 4: "Hold — seven counts.", 11: "Exhale — eight counts.", 19: "Inhale — four counts.", 23: "Hold — seven.", 30: "Exhale — eight counts.", 38: "Inhale — four counts.", 42: "Hold.", 49: "Long exhale.", 110: "Last few seconds."]),
+            Exercise(name: "Box Breathing", exerciseDescription: "Square breathing (4-4-4-4).", durationSeconds: 300, category: .breathing, instructions: ["Inhale 4s.", "Hold 4s.", "Exhale 4s.", "Hold 4s."], tips: ["Equal counts.", "Mental focus."], audioCues: [0: "Sit tall. Prepare to breathe.", 4: "Hold — four counts.", 8: "Exhale — four counts.", 12: "Hold — four counts.", 16: "Inhale — four counts.", 20: "Hold.", 24: "Exhale.", 28: "Hold.", 32: "Inhale.", 48: "Inhale.", 64: "Inhale.", 80: "Inhale.", 96: "Inhale.", 112: "Inhale.", 128: "Inhale — halfway there.", 144: "Inhale.", 160: "Inhale.", 176: "Inhale.", 192: "Inhale.", 208: "Inhale.", 224: "Inhale.", 240: "Inhale.", 256: "Inhale.", 272: "Inhale.", 288: "Last cycle — inhale.", 290: "Last few seconds."]),
+            Exercise(name: "Alternate Nostril Breathing", exerciseDescription: "Balance focus.", durationSeconds: 180, category: .breathing, instructions: ["Close one nostril.", "Inhale other.", "Switch nostrils.", "Exhale."], tips: ["Keep it gentle.", "Don't force."], audioCues: [0: "Close right nostril — inhale left.", 10: "Close left nostril — exhale right.", 20: "Inhale right nostril.", 30: "Close right — exhale left.", 40: "Inhale left nostril.", 60: "Switch and exhale.", 90: "Continue the alternating pattern.", 170: "Last few seconds."]),
+            Exercise(name: "Pursed Lip Breathing", exerciseDescription: "Ease of breath.", durationSeconds: 120, category: .breathing, instructions: ["Inhale through nose.", "Exhale through pursed lips."], tips: ["Slow the exhale.", "Like blowing out a candle."], audioCues: [0: "Inhale through your nose.", 4: "Exhale through pursed lips.", 14: "Inhale — two counts.", 16: "Exhale slowly — four counts.", 60: "Continue — in through nose.", 110: "Last few seconds."]),
+            Exercise(name: "Resonant Breathing", exerciseDescription: "6 breaths per minute.", durationSeconds: 300, category: .breathing, instructions: ["5.5s inhale.", "5.5s exhale."], tips: ["Coherent rhythm.", "Steady flow."], audioCues: [0: "Inhale slowly — five counts.", 5: "Exhale slowly — five counts.", 11: "Inhale.", 16: "Exhale.", 22: "Inhale.", 44: "Inhale — slow and steady.", 66: "Inhale.", 88: "Inhale.", 110: "Inhale.", 132: "Inhale — you're halfway.", 154: "Inhale.", 176: "Inhale.", 198: "Inhale.", 220: "Inhale.", 242: "Inhale.", 264: "Inhale.", 286: "Inhale — last few breaths.", 290: "Last few seconds."]),
+            Exercise(name: "Gentle Breath Holds", exerciseDescription: "Body awareness.", durationSeconds: 120, category: .breathing, instructions: ["Inhale.", "Hold comfortably.", "Exhale."], tips: ["Don't push limits.", "Stay relaxed."], audioCues: [0: "Inhale fully.", 5: "Gentle hold — stay relaxed.", 15: "Exhale slowly.", 25: "Inhale — and hold.", 35: "Exhale.", 60: "Inhale — gentle hold.", 70: "Exhale slowly.", 110: "Last few seconds."]),
+            Exercise(name: "Progressive Relaxation", exerciseDescription: "Deep rest.", durationSeconds: 300, category: .breathing, instructions: ["Tense and release muscles with breath."], tips: ["Start from toes.", "Work up to head."], audioCues: [0: "Relax your whole body. Close your eyes.", 20: "Tense your feet — hold.", 25: "Release your feet completely.", 50: "Tense your calves — hold.", 55: "Release your calves.", 80: "Tense your thighs — hold.", 85: "Release.", 120: "Tighten your belly — hold.", 130: "Release your core.", 170: "Shrug your shoulders — hold.", 180: "Drop your shoulders. Release.", 250: "Relax your face completely.", 290: "Last few seconds."])
         ]
     }
 
@@ -381,7 +386,10 @@ extension Exercise {
                     15: "Inhale again.",
                     20: "And release. Ha!",
                     60: "Keep going. Inhale.",
-                    65: "Release!"
+                    65: "Release!",
+                    80: "Inhale — one more round.",
+                    85: "Open wide — release!",
+                    110: "Almost there."
                 ]
             ),
             Exercise(
@@ -408,7 +416,10 @@ extension Exercise {
                     10: "Hum as you exhale.",
                     30: "Inhale again.",
                     35: "Long, steady hum.",
-                    90: "Continue at your own pace."
+                    60: "Inhale — keep the vibration going.",
+                    65: "Hum slowly — feel the resonance.",
+                    90: "Continue at your own pace.",
+                    170: "Last few seconds."
                 ]
             )
         ]
@@ -420,26 +431,26 @@ extension Exercise {
 
     private static func originalBodyweightExercises() -> [Exercise] {
         [
-            Exercise(name: "Push-ups", exerciseDescription: "Standard chest and arms.", durationSeconds: 60, category: .bodyweight, instructions: ["High plank.", "Lower chest.", "Push up."], tips: ["Core tight.", "Elbows at 45 deg."], difficulty: .beginner),
-            Exercise(name: "Knee Push-ups", exerciseDescription: "Modified push-up.", durationSeconds: 60, category: .bodyweight, instructions: ["Knees down.", "Lower chest.", "Push up."], tips: ["Keep back flat.", "Good for beginners."], difficulty: .beginner),
-            Exercise(name: "Plank Shoulder Taps", exerciseDescription: "Core stability.", durationSeconds: 60, category: .bodyweight, instructions: ["High plank.", "Tap opposite shoulder.", "Switch."], tips: ["Don't rock hips.", "Stable base."], difficulty: .intermediate),
-            Exercise(name: "Triceps Dips", exerciseDescription: "Using a chair or bench.", durationSeconds: 60, category: .bodyweight, instructions: ["Hands on chair edge.", "Lower hips.", "Push up."], tips: ["Keep back close to chair.", "Elbows back."], difficulty: .intermediate),
-            Exercise(name: "Arm Circles", exerciseDescription: "Shoulder endurance.", durationSeconds: 60, category: .bodyweight, instructions: ["Arms out to sides.", "Small circles.", "Reverse."], tips: ["Keep arms straight.", "Controlled speed."], difficulty: .beginner),
-            Exercise(name: "Inchworm Walks", exerciseDescription: "Full body mobility.", durationSeconds: 60, category: .bodyweight, instructions: ["Hinge and touch floor.", "Walk hands to plank.", "Walk hands back."], tips: ["Keep legs straight as possible.", "Stretch at top."], difficulty: .intermediate),
-            Exercise(name: "Front Plank", exerciseDescription: "Core isometric.", durationSeconds: 60, category: .bodyweight, instructions: ["Support on elbows.", "Straight line."], tips: ["Don't sag.", "Squeeze glutes."], difficulty: .beginner),
-            Exercise(name: "Side Plank", exerciseDescription: "Oblique focus.", durationSeconds: 60, category: .bodyweight, instructions: ["Support on one elbow side.", "Bridge up.", "Switch sides."], tips: ["Hips high.", "Chest open."], difficulty: .intermediate),
-            Exercise(name: "Glute Bridges", exerciseDescription: "Posterior chain.", durationSeconds: 60, category: .bodyweight, instructions: ["Lie on back.", "Lift hips.", "Squeeze."], tips: ["Feet flat.", "Don't overarch."], difficulty: .beginner),
-            Exercise(name: "Bicycle Crunches", exerciseDescription: "Core rotation.", durationSeconds: 60, category: .bodyweight, instructions: ["Elbow to opposite knee.", "Switch."], tips: ["Shoulders off floor.", "Controlled motion."], difficulty: .intermediate),
-            Exercise(name: "Leg Raises", exerciseDescription: "Lower core focus.", durationSeconds: 60, category: .bodyweight, instructions: ["Lie on back.", "Lift legs 90 deg.", "Lower slowly."], tips: ["Back flat on floor.", "Don't touch floor."], difficulty: .intermediate),
-            Exercise(name: "Mountain Climbers", exerciseDescription: "Cardio and core.", durationSeconds: 60, category: .bodyweight, instructions: ["High plank.", "Drive knees to chest."], tips: ["Keep hips low.", "Light on feet."], difficulty: .intermediate),
-            Exercise(name: "Squats", exerciseDescription: "Leg basics.", durationSeconds: 60, category: .bodyweight, instructions: ["Sit back onto heels.", "Stand up."], tips: ["Knees behind toes.", "Chest up."], difficulty: .beginner),
-            Exercise(name: "Lunges", exerciseDescription: "Lower body balance.", durationSeconds: 60, category: .bodyweight, instructions: ["Step forward.", "Lower back knee.", "Push back."], tips: ["Torso upright.", "Controlled step."], difficulty: .beginner),
-            Exercise(name: "Calf Raises", exerciseDescription: "Lower leg strength.", durationSeconds: 60, category: .bodyweight, instructions: ["Rise onto toes.", "Lower."], tips: ["Hold at top.", "Go through full range."], difficulty: .beginner),
-            Exercise(name: "Wall Sit", exerciseDescription: "Quad isometric.", durationSeconds: 60, category: .bodyweight, instructions: ["Back against wall.", "Legs 90 deg.", "Hold."], tips: ["Push back.", "Relax arms."], difficulty: .intermediate),
-            Exercise(name: "Burpees", exerciseDescription: "Full body explosive.", durationSeconds: 60, category: .bodyweight, instructions: ["Squat, jump back, jump in, jump up."], tips: ["Maintain form.", "Steady pace."], difficulty: .advanced),
-            Exercise(name: "Clamshells", exerciseDescription: "Hip focus (Female focus).", durationSeconds: 60, category: .bodyweight, instructions: ["Side lying.", "Open knees.", "Switch sides."], tips: ["Hips stacked.", "Control the open."], difficulty: .beginner, genderFocus: .female),
-            Exercise(name: "Diamond Push-ups", exerciseDescription: "Triceps focus (Male focus).", durationSeconds: 60, category: .bodyweight, instructions: ["Hands in diamond shape.", "Push up."], tips: ["Elbows in.", "Keep core tight."], difficulty: .advanced, genderFocus: .male),
-            Exercise(name: "Jump Squats", exerciseDescription: "Explosive power (Male focus).", durationSeconds: 60, category: .bodyweight, instructions: ["Squat and jump."], tips: ["Land softly.", "Use your arms."], difficulty: .advanced, genderFocus: .male)
+            Exercise(name: "Push-ups", exerciseDescription: "Standard chest and arms.", durationSeconds: 60, category: .bodyweight, instructions: ["High plank.", "Lower chest.", "Push up."], tips: ["Core tight.", "Elbows at 45 deg."], audioCues: [0: "Start in a high plank position.", 15: "Keep core tight, elbows at 45.", 30: "Good pace — halfway there.", 50: "Last few — finish strong."], difficulty: .beginner),
+            Exercise(name: "Knee Push-ups", exerciseDescription: "Modified push-up.", durationSeconds: 60, category: .bodyweight, instructions: ["Knees down.", "Lower chest.", "Push up."], tips: ["Keep back flat.", "Good for beginners."], audioCues: [0: "Knees down, hands under shoulders.", 15: "Lower with control — chest toward floor.", 30: "Good — halfway there.", 50: "Last few — finish strong."], difficulty: .beginner),
+            Exercise(name: "Plank Shoulder Taps", exerciseDescription: "Core stability.", durationSeconds: 60, category: .bodyweight, instructions: ["High plank.", "Tap opposite shoulder.", "Switch."], tips: ["Don't rock hips.", "Stable base."], audioCues: [0: "High plank — brace your core.", 15: "Tap and hold — don't rock hips.", 30: "Steady hips — keep going.", 50: "Almost there — don't give up."], difficulty: .intermediate),
+            Exercise(name: "Triceps Dips", exerciseDescription: "Using a chair or bench.", durationSeconds: 60, category: .bodyweight, instructions: ["Hands on chair edge.", "Lower hips.", "Push up."], tips: ["Keep back close to chair.", "Elbows back."], audioCues: [0: "Hands on chair edge, back straight.", 15: "Lower slow — elbows point back.", 30: "Halfway — keep the control.", 50: "Almost there — last few reps."], difficulty: .intermediate),
+            Exercise(name: "Arm Circles", exerciseDescription: "Shoulder endurance.", durationSeconds: 60, category: .bodyweight, instructions: ["Arms out to sides.", "Small circles.", "Reverse."], tips: ["Keep arms straight.", "Controlled speed."], audioCues: [0: "Arms out — small circles forward.", 15: "Keep shoulders down and relaxed.", 30: "Reverse — circles going backward.", 50: "Almost there."], difficulty: .beginner),
+            Exercise(name: "Inchworm Walks", exerciseDescription: "Full body mobility.", durationSeconds: 60, category: .bodyweight, instructions: ["Hinge and touch floor.", "Walk hands to plank.", "Walk hands back."], tips: ["Keep legs straight as possible.", "Stretch at top."], audioCues: [0: "Hinge down, touch the floor.", 15: "Walk hands out to plank.", 30: "Walk hands back — stand tall.", 50: "Almost there."], difficulty: .intermediate),
+            Exercise(name: "Front Plank", exerciseDescription: "Core isometric.", durationSeconds: 60, category: .bodyweight, instructions: ["Support on elbows.", "Straight line."], tips: ["Don't sag.", "Squeeze glutes."], audioCues: [0: "Elbows under shoulders — hold plank.", 15: "Hips level — squeeze your glutes.", 30: "Breathe — don't hold your breath.", 50: "Last ten seconds — hold strong.", 55: "Five seconds left."], difficulty: .beginner),
+            Exercise(name: "Side Plank", exerciseDescription: "Oblique focus.", durationSeconds: 60, category: .bodyweight, instructions: ["Support on one elbow side.", "Bridge up.", "Switch sides."], tips: ["Hips high.", "Chest open."], audioCues: [0: "Right side plank — hips lifted high.", 15: "Chest open — don't collapse inward.", 30: "Switch to your left side.", 50: "Almost there — hold it.", 55: "Five seconds left."], difficulty: .intermediate),
+            Exercise(name: "Glute Bridges", exerciseDescription: "Posterior chain.", durationSeconds: 60, category: .bodyweight, instructions: ["Lie on back.", "Lift hips.", "Squeeze."], tips: ["Feet flat.", "Don't overarch."], audioCues: [0: "Lie back, feet flat, knees up.", 15: "Drive through your heels — lift hips.", 30: "Squeeze glutes at the top.", 50: "Almost there."], difficulty: .beginner),
+            Exercise(name: "Bicycle Crunches", exerciseDescription: "Core rotation.", durationSeconds: 60, category: .bodyweight, instructions: ["Elbow to opposite knee.", "Switch."], tips: ["Shoulders off floor.", "Controlled motion."], audioCues: [0: "Shoulders off floor — elbow to knee.", 15: "Controlled rotation — no rushing.", 30: "Halfway — keep your core engaged.", 50: "Last few reps — finish strong."], difficulty: .intermediate),
+            Exercise(name: "Leg Raises", exerciseDescription: "Lower core focus.", durationSeconds: 60, category: .bodyweight, instructions: ["Lie on back.", "Lift legs 90 deg.", "Lower slowly."], tips: ["Back flat on floor.", "Don't touch floor."], audioCues: [0: "Lie flat, press lower back down.", 15: "Raise both legs — slow and controlled.", 30: "Lower slowly — don't touch the floor.", 50: "Almost there."], difficulty: .intermediate),
+            Exercise(name: "Mountain Climbers", exerciseDescription: "Cardio and core.", durationSeconds: 60, category: .bodyweight, instructions: ["High plank.", "Drive knees to chest."], tips: ["Keep hips low.", "Light on feet."], audioCues: [0: "High plank — drive your knees in.", 15: "Keep hips low — light on feet.", 30: "Halfway — maintain steady pace.", 50: "Last few seconds — push through."], difficulty: .intermediate),
+            Exercise(name: "Squats", exerciseDescription: "Leg basics.", durationSeconds: 60, category: .bodyweight, instructions: ["Sit back onto heels.", "Stand up."], tips: ["Knees behind toes.", "Chest up."], audioCues: [0: "Feet shoulder-width, toes slightly out.", 15: "Knees track over toes — chest up.", 30: "Good pace — halfway there.", 50: "Last few — push through your heels."], difficulty: .beginner),
+            Exercise(name: "Lunges", exerciseDescription: "Lower body balance.", durationSeconds: 60, category: .bodyweight, instructions: ["Step forward.", "Lower back knee.", "Push back."], tips: ["Torso upright.", "Controlled step."], audioCues: [0: "Step forward — right leg first.", 15: "Torso upright — lower with control.", 30: "Switch — now lead with left leg.", 50: "Almost there."], difficulty: .beginner),
+            Exercise(name: "Calf Raises", exerciseDescription: "Lower leg strength.", durationSeconds: 60, category: .bodyweight, instructions: ["Rise onto toes.", "Lower."], tips: ["Hold at top.", "Go through full range."], audioCues: [0: "Rise onto your toes — hold at top.", 30: "Good range — keep going.", 50: "Almost there."], difficulty: .beginner),
+            Exercise(name: "Wall Sit", exerciseDescription: "Quad isometric.", durationSeconds: 60, category: .bodyweight, instructions: ["Back against wall.", "Legs 90 deg.", "Hold."], tips: ["Push back.", "Relax arms."], audioCues: [0: "Back flat on wall, legs at 90.", 15: "Push back into wall — relax arms.", 30: "Halfway — breathe through it.", 50: "Ten seconds — hold on.", 55: "Five seconds left."], difficulty: .intermediate),
+            Exercise(name: "Burpees", exerciseDescription: "Full body explosive.", durationSeconds: 60, category: .bodyweight, instructions: ["Squat, jump back, jump in, jump up."], tips: ["Maintain form.", "Steady pace."], audioCues: [0: "Squat down, jump back to plank.", 15: "Land softly — maintain your form.", 30: "Halfway — control the pace.", 50: "Last few — finish strong."], difficulty: .advanced),
+            Exercise(name: "Clamshells", exerciseDescription: "Hip focus (Female focus).", durationSeconds: 60, category: .bodyweight, instructions: ["Side lying.", "Open knees.", "Switch sides."], tips: ["Hips stacked.", "Control the open."], audioCues: [0: "Lie on right side, knees bent.", 15: "Open your top knee — control it.", 30: "Switch to your left side.", 50: "Almost there."], difficulty: .beginner, genderFocus: .female),
+            Exercise(name: "Diamond Push-ups", exerciseDescription: "Triceps focus (Male focus).", durationSeconds: 60, category: .bodyweight, instructions: ["Hands in diamond shape.", "Push up."], tips: ["Elbows in.", "Keep core tight."], audioCues: [0: "Hands in diamond, high plank position.", 15: "Elbows in — lower with control.", 30: "Good work — halfway through.", 50: "Last few — finish strong."], difficulty: .advanced, genderFocus: .male),
+            Exercise(name: "Jump Squats", exerciseDescription: "Explosive power (Male focus).", durationSeconds: 60, category: .bodyweight, instructions: ["Squat and jump."], tips: ["Land softly.", "Use your arms."], audioCues: [0: "Squat low — explode up.", 15: "Land softly — absorb with legs.", 30: "Good power — halfway there.", 50: "Last few — land with control."], difficulty: .advanced, genderFocus: .male)
         ]
     }
 
@@ -467,7 +478,10 @@ extension Exercise {
                     0: "Lie face down. Arms overhead.",
                     5: "Lift everything off the floor. Hold.",
                     10: "Lower slowly.",
-                    15: "And lift again."
+                    15: "And lift again.",
+                    30: "Keep your neck neutral — look down.",
+                    50: "Almost there.",
+                    55: "Five seconds left."
                 ]
             ),
             Exercise(
@@ -491,7 +505,9 @@ extension Exercise {
                     0: "Arms up, knees at 90 degrees.",
                     5: "Right arm back, left leg out.",
                     10: "Return to center.",
-                    15: "Left arm back, right leg out."
+                    15: "Left arm back, right leg out.",
+                    30: "Press lower back into the floor.",
+                    50: "Almost there."
                 ]
             ),
             Exercise(
@@ -515,7 +531,9 @@ extension Exercise {
                     0: "On all fours. Flat back.",
                     5: "Right arm and left leg out.",
                     10: "Return.",
-                    15: "Left arm and right leg out."
+                    15: "Left arm and right leg out.",
+                    30: "Keep your hips level and square.",
+                    50: "Almost there."
                 ]
             )
         ]
@@ -528,17 +546,17 @@ extension Exercise {
     private static func kegelExercises() -> [Exercise] {
         [
             // Universal / Initial Identification
-            Exercise(name: "Muscle Discovery", exerciseDescription: "Find your pelvic floor muscles.", durationSeconds: 60, category: .stretching, instructions: ["Imagine stopping urine midstream.", "Tighten as if stopping gas.", "Feel the lift and squeeze."], tips: ["Sit or lie down at first.", "Isolate the muscle.", "Don't hold your breath."], audioCues: [0: "Squeeze to find the muscle.", 5: "Now relax completely."]),
+            Exercise(name: "Muscle Discovery", exerciseDescription: "Find your pelvic floor muscles.", durationSeconds: 60, category: .stretching, instructions: ["Imagine stopping urine midstream.", "Tighten as if stopping gas.", "Feel the lift and squeeze."], tips: ["Sit or lie down at first.", "Isolate the muscle.", "Don't hold your breath."], audioCues: [0: "Squeeze to find the muscle.", 5: "Now relax completely.", 20: "Squeeze and feel the lift.", 35: "Relax — release any tension.", 50: "Almost there."]),
 
             // Male Focus
-            Exercise(name: "Standard Kegels", exerciseDescription: "Long holds for endurance.", durationSeconds: 120, category: .stretching, instructions: ["Imagine pulling your scrotum up.", "Squeeze for 3-5 seconds.", "Relax for 3-5 seconds."], tips: ["Count out loud to breathe.", "Don't squeeze your butt.", "Relax your thighs."], audioCues: [0: "Lift and hold for 5.", 5: "Relax for 5.", 10: "Hold again."], genderFocus: .male),
+            Exercise(name: "Standard Kegels", exerciseDescription: "Long holds for endurance.", durationSeconds: 120, category: .stretching, instructions: ["Imagine pulling your scrotum up.", "Squeeze for 3-5 seconds.", "Relax for 3-5 seconds."], tips: ["Count out loud to breathe.", "Don't squeeze your butt.", "Relax your thighs."], audioCues: [0: "Lift and hold — five seconds.", 5: "Relax for five.", 10: "Squeeze and hold again.", 20: "Relax — breathe normally.", 30: "Lift and hold — five seconds.", 50: "Relax completely.", 60: "Squeeze and hold.", 80: "Hold — five more seconds.", 95: "Relax and breathe.", 110: "Last few seconds — finish strong."], genderFocus: .male),
 
-            Exercise(name: "Power Pulses", exerciseDescription: "Fast power reps.", durationSeconds: 60, category: .stretching, instructions: ["Quickly squeeze and relax.", "Aim for 1 pulse per second."], tips: ["Flicker sensation.", "Keep it isolated.", "Breath normally."], audioCues: [0: "Quick pulses start now.", 1: "Squeeze, relax.", 2: "Squeeze, relax."], genderFocus: .male),
+            Exercise(name: "Power Pulses", exerciseDescription: "Fast power reps.", durationSeconds: 60, category: .stretching, instructions: ["Quickly squeeze and relax.", "Aim for 1 pulse per second."], tips: ["Flicker sensation.", "Keep it isolated.", "Breath normally."], audioCues: [0: "Quick pulses — start now.", 1: "Squeeze, relax.", 2: "Squeeze, relax.", 30: "Keep the rhythm going.", 50: "Almost there."], genderFocus: .male),
 
             // Female Focus
-            Exercise(name: "Standard Kegels", exerciseDescription: "Pelvic floor endurance.", durationSeconds: 120, category: .stretching, instructions: ["Contract the pelvic floor.", "Squeeze for 3-5 seconds.", "Relax for 3-5 seconds."], tips: ["Imagine an elevator lift.", "Don't hold your breath.", "Keep core relaxed."], audioCues: [0: "Squeeze and lift.", 5: "Now relax completely."], genderFocus: .female),
+            Exercise(name: "Standard Kegels", exerciseDescription: "Pelvic floor endurance.", durationSeconds: 120, category: .stretching, instructions: ["Contract the pelvic floor.", "Squeeze for 3-5 seconds.", "Relax for 3-5 seconds."], tips: ["Imagine an elevator lift.", "Don't hold your breath.", "Keep core relaxed."], audioCues: [0: "Squeeze and lift the pelvic floor.", 5: "Now relax completely.", 15: "Squeeze — hold for five.", 25: "Relax fully.", 40: "Lift and squeeze — hold five.", 55: "Relax — breathe normally.", 70: "Squeeze and hold.", 85: "Relax fully.", 95: "One more hold — lift and squeeze.", 110: "Last few seconds — finish strong."], genderFocus: .female),
 
-            Exercise(name: "Elevator Kegels", exerciseDescription: "Gradual control.", durationSeconds: 120, category: .stretching, instructions: ["Squeeze in 3 stages.", "Relax in 3 stages."], tips: ["Control is key.", "Smooth movement.", "Don't push down."], audioCues: [0: "Stage 1 squeeze.", 5: "Stage 2.", 10: "Stage 3 hold.", 15: "Stage 2 relax."], genderFocus: .female)
+            Exercise(name: "Elevator Kegels", exerciseDescription: "Gradual control.", durationSeconds: 120, category: .stretching, instructions: ["Squeeze in 3 stages.", "Relax in 3 stages."], tips: ["Control is key.", "Smooth movement.", "Don't push down."], audioCues: [0: "Stage one — gentle squeeze.", 5: "Stage two — hold.", 10: "Stage three — squeeze tight.", 15: "Release down through each stage.", 25: "Reset — stage one.", 35: "Stage two — hold.", 45: "Stage three — squeeze tight.", 55: "Release back down.", 70: "Stage one squeeze — fresh set.", 80: "Stage two.", 90: "Stage three — hold tight.", 100: "Release all the way down.", 110: "Almost there."], genderFocus: .female)
         ]
     }
 
@@ -566,8 +584,10 @@ extension Exercise {
                     "Start with short holds and build up gradually."
                 ],
                 audioCues: [
-                    0: "Hold onto a chair if needed. Lift your right foot.",
-                    30: "Switch to your left foot."
+                    0: "Hold a chair if needed. Right foot up.",
+                    15: "Eyes on a fixed point ahead.",
+                    30: "Switch to your left foot.",
+                    50: "Almost there."
                 ]
             ),
             Exercise(
@@ -588,8 +608,10 @@ extension Exercise {
                     "Go slowly — speed is not the goal."
                 ],
                 audioCues: [
-                    0: "Stay near a wall. Place your heel in front of your toes.",
-                    30: "Keep going, nice and steady."
+                    0: "Near a wall. Heel in front of toes.",
+                    15: "Arms out — eyes forward, not down.",
+                    30: "Keep going, nice and steady.",
+                    50: "Almost there."
                 ]
             ),
             Exercise(
@@ -610,8 +632,10 @@ extension Exercise {
                     "Start with your foot on the calf before progressing higher."
                 ],
                 audioCues: [
-                    0: "Keep a chair close. Balance on your right leg.",
-                    30: "Switch to your left leg."
+                    0: "Keep a chair close. Right leg balancing.",
+                    15: "Hold the chair if needed — breathe.",
+                    30: "Switch to your left leg.",
+                    50: "Almost there."
                 ]
             ),
             Exercise(
@@ -632,10 +656,11 @@ extension Exercise {
                     "Maintain an upright posture throughout."
                 ],
                 audioCues: [
-                    0: "Hold a chair for support. Lift your right knee.",
+                    0: "Hold a chair. Lift your right knee.",
                     15: "Lower and switch.",
                     30: "Lift your left knee.",
-                    45: "Lower and switch."
+                    45: "Lower and switch.",
+                    50: "Almost there."
                 ]
             ),
             Exercise(
@@ -660,7 +685,8 @@ extension Exercise {
                     0: "Feet hip-width apart. Shift weight to your right.",
                     15: "Now shift to your left.",
                     30: "Back to the right.",
-                    45: "And to the left."
+                    45: "And to the left.",
+                    50: "Almost there."
                 ]
             ),
             Exercise(
@@ -686,7 +712,8 @@ extension Exercise {
                     20: "Reach to 3 o'clock.",
                     30: "Switch legs. Stand on your left.",
                     40: "Reach to 12.",
-                    50: "Reach to 9."
+                    50: "Reach to 9 o'clock.",
+                    55: "Almost there."
                 ],
                 difficulty: .intermediate
             )

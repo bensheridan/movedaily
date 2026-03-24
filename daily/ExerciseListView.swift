@@ -180,8 +180,15 @@ struct ExerciseDetailView: View {
                 // Controls
                 HStack(spacing: 12) {
                     Button(action: {
+                        let isFreshStart = !timerActive && !timerCompleted && timeRemaining == exercise.durationSeconds
                         timerActive.toggle()
                         UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        if isFreshStart && timerActive && audioEnabled {
+                            TTSManager.shared.speak(exercise.name)
+                            if let openingCue = exercise.audioCues[0] {
+                                TTSManager.shared.queue(openingCue)
+                            }
+                        }
                     }) {
                         Label(timerActive ? "Pause" : "Start", systemImage: timerActive ? "pause.fill" : "play.fill")
                             .frame(maxWidth: .infinity)
