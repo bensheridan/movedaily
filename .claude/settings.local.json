@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv tool install:*)",
+      "Bash(curl:*)",
+      "Bash(sh)",
+      "Bash(export PATH=\"$HOME/.local/bin:$PATH\")",
+      "WebFetch(domain:github.com)"
+    ]
+  }
+}
