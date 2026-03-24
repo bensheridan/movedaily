@@ -4,6 +4,8 @@ import UIKit
 import PhotosUI
 import UserNotifications
 
+// MARK: - Profile View
+
 struct ProfileView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var profiles: [UserProfile]
@@ -36,93 +38,16 @@ struct ProfileView: View {
     }
 
     var body: some View {
-        Form {
-            Section(header: Text("Your Profile")) {
-                VStack(spacing: 8) {
-                    if let uiImage = profile?.profileImage {
-                        Image(uiImage: uiImage)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 100, height: 100)
-                            .clipShape(Circle())
-                            .shadow(radius: 4)
-                    } else {
-                        Image(systemName: "person.crop.circle.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 100, height: 100)
-                            .foregroundColor(.gray)
-                    }
-                    Button("Edit") {
-                        showingImagePicker = true
-                    }
-                }
-                HStack {
-                    Text("Gender")
-                    Spacer()
-                    Picker("Gender", selection: $selectedGender) {
-                        ForEach(Gender.allCases) { gender in
-                            Text(gender.rawValue).tag(gender)
-                        }
-                    }
-                    .pickerStyle(.menu)
-                    .onChange(of: selectedGender) { newValue in
-                        if let profile = profile {
-                            profile.gender = newValue
-                        }
-                    }
-                }
-                HStack {
-                    Text("Level")
-                    Spacer()
-                    Text("\(profile?.level ?? 1)")
-                }
-                HStack {
-                    Text("XP")
-                    Spacer()
-                    Text("\(profile?.xp ?? 0)")
-                }
-                HStack {
-                    Text("Streak")
-                    Spacer()
-                    Text("\(profile?.streakCount ?? 0) days")
-                }
+        ScrollView {
+            VStack(spacing: DesignTokens.sectionSpacing) {
+                profileHeroCard
+                remindersCard
+                resetCard
             }
-
-            Section(header: Text("Reminders")) {
-                Toggle("Enable Reminder", isOn: $reminderEnabled)
-                    .onChange(of: reminderEnabled) { isEnabled in
-                        if isEnabled {
-                            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, _ in
-                                DispatchQueue.main.async {
-                                    if granted {
-                                        NotificationManager.shared.scheduleDailyReminder(at: reminderTime)
-                                    } else {
-                                        reminderEnabled = false
-                                    }
-                                }
-                            }
-                        } else {
-                            NotificationManager.shared.removeReminder()
-                        }
-                    }
-                DatePicker("Reminder Time", selection: reminderDate, displayedComponents: [.hourAndMinute])
-                    .disabled(!reminderEnabled)
-                    .onChange(of: reminderDate.wrappedValue) { _ in
-                        if reminderEnabled {
-                            NotificationManager.shared.scheduleDailyReminder(at: reminderTime)
-                        }
-                    }
-            }
-
-            Section {
-                Button(role: .destructive) {
-                    showingResetAlert = true
-                } label: {
-                    Label("Reset Profile", systemImage: "arrow.counterclockwise")
-                }
-            }
+            .padding(DesignTokens.cardPadding)
+            .padding(.bottom, DesignTokens.sectionSpacing)
         }
+        .background(Color(uiColor: .systemGroupedBackground))
         .navigationTitle("Profile")
         .onAppear {
             if let gender = profile?.gender {
@@ -130,9 +55,7 @@ struct ProfileView: View {
             }
         }
         .alert("Reset Profile?", isPresented: $showingResetAlert) {
-            Button("Reset", role: .destructive) {
-                resetProfile()
-            }
+            Button("Reset", role: .destructive) { resetProfile() }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("This will reset your streak, XP, and level but keep your gender selection.")
@@ -147,6 +70,138 @@ struct ProfileView: View {
         }
     }
 
+    // MARK: - Profile Hero Card
+
+    private var profileHeroCard: some View {
+        VStack(spacing: DesignTokens.sectionSpacing) {
+            // Photo
+            VStack(spacing: 10) {
+                if let uiImage = profile?.profileImage {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 90, height: 90)
+                        .clipShape(Circle())
+                        .shadow(radius: 4)
+                } else {
+                    Image(systemName: "person.crop.circle.fill")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 90, height: 90)
+                        .foregroundStyle(.secondary)
+                }
+
+                Button("Edit Photo") {
+                    showingImagePicker = true
+                }
+                .font(.subheadline)
+                .buttonStyle(DesignTokens.scaleButton)
+            }
+
+            Divider()
+
+            // Gender picker
+            HStack {
+                Label("Gender", systemImage: "person")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Picker("Gender", selection: $selectedGender) {
+                    ForEach(Gender.allCases) { gender in
+                        Text(gender.rawValue).tag(gender)
+                    }
+                }
+                .pickerStyle(.menu)
+                .onChange(of: selectedGender) { newValue in
+                    if let profile = profile {
+                        profile.gender = newValue
+                    }
+                }
+            }
+
+            Divider()
+
+            // Stats row
+            HStack(spacing: 0) {
+                statChip(value: "\(profile?.streakCount ?? 0)", label: "Streak", icon: "flame.fill", color: .orange)
+                Divider().frame(height: 40)
+                statChip(value: "\(profile?.level ?? 1)", label: "Level", icon: "star.fill", color: .yellow)
+                Divider().frame(height: 40)
+                statChip(value: "\(profile?.xp ?? 0)", label: "XP", icon: "bolt.fill", color: .blue)
+            }
+        }
+        .padding(DesignTokens.cardPadding)
+        .cardStyle()
+    }
+
+    // MARK: - Reminders Card
+
+    private var remindersCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Reminders")
+                .font(.headline)
+
+            Toggle("Enable daily reminder", isOn: $reminderEnabled)
+                .onChange(of: reminderEnabled) { isEnabled in
+                    if isEnabled {
+                        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, _ in
+                            DispatchQueue.main.async {
+                                if granted {
+                                    NotificationManager.shared.scheduleDailyReminder(at: reminderTime)
+                                } else {
+                                    reminderEnabled = false
+                                }
+                            }
+                        }
+                    } else {
+                        NotificationManager.shared.removeReminder()
+                    }
+                }
+
+            DatePicker("Reminder time", selection: reminderDate, displayedComponents: [.hourAndMinute])
+                .disabled(!reminderEnabled)
+                .onChange(of: reminderDate.wrappedValue) { _ in
+                    if reminderEnabled {
+                        NotificationManager.shared.scheduleDailyReminder(at: reminderTime)
+                    }
+                }
+        }
+        .padding(DesignTokens.cardPadding)
+        .cardStyle()
+    }
+
+    // MARK: - Reset Card
+
+    private var resetCard: some View {
+        VStack {
+            Button(role: .destructive) {
+                showingResetAlert = true
+            } label: {
+                Label("Reset Profile", systemImage: "arrow.counterclockwise")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(DesignTokens.scaleButton)
+        }
+        .padding(DesignTokens.cardPadding)
+        .cardStyle()
+    }
+
+    // MARK: - Helpers
+
+    private func statChip(value: String, label: String, icon: String, color: Color) -> some View {
+        VStack(spacing: 4) {
+            Image(systemName: icon)
+                .foregroundStyle(color)
+            Text(value)
+                .font(.headline)
+                .contentTransition(.numericText())
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
     private func resetProfile() {
         guard let profile = profile else { return }
         profile.xp = 0
@@ -155,6 +210,8 @@ struct ProfileView: View {
         profile.lastExerciseDate = nil
     }
 }
+
+// MARK: - Image Picker
 
 struct ImagePicker: UIViewControllerRepresentable {
     @Binding var image: UIImage?
@@ -168,9 +225,7 @@ struct ImagePicker: UIViewControllerRepresentable {
 
         func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
             picker.dismiss(animated: true)
-
             guard let provider = results.first?.itemProvider else { return }
-
             if provider.canLoadObject(ofClass: UIImage.self) {
                 provider.loadObject(ofClass: UIImage.self) { image, _ in
                     DispatchQueue.main.async {
@@ -183,15 +238,12 @@ struct ImagePicker: UIViewControllerRepresentable {
         }
     }
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
 
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var config = PHPickerConfiguration()
         config.filter = .images
         config.selectionLimit = 1
-
         let picker = PHPickerViewController(configuration: config)
         picker.delegate = context.coordinator
         return picker
@@ -200,8 +252,10 @@ struct ImagePicker: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: PHPickerViewController, context: Context) {}
 }
 
+// MARK: - Preview
+
 #Preview {
-    NavigationView {
+    NavigationStack {
         ProfileView()
             .modelContainer(for: UserProfile.self, inMemory: true)
     }

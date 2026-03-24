@@ -8,23 +8,23 @@
 import SwiftUI
 import SwiftData
 
-// Custom LiquidGlass view for glassy background effect
+// MARK: - LiquidGlass Background
+
 struct LiquidGlass: View {
     @State private var animate = false
 
     var body: some View {
         ZStack {
-            // Ultra thin material background with blur
             Rectangle()
                 .fill(.ultraThinMaterial)
                 .blur(radius: 2)
 
-            // Subtle animated color reflections
+            // Subtle animated overlay — works in both Light and Dark Mode
             LinearGradient(
                 colors: [
-                    Color.white.opacity(animate ? 0.25 : 0.15),
-                    Color.blue.opacity(animate ? 0.15 : 0.1),
-                    Color.white.opacity(animate ? 0.2 : 0.1)
+                    Color.white.opacity(animate ? 0.12 : 0.07),
+                    Color.blue.opacity(animate ? 0.06 : 0.03),
+                    Color.white.opacity(animate ? 0.10 : 0.05)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -38,6 +38,8 @@ struct LiquidGlass: View {
         .ignoresSafeArea()
     }
 }
+
+// MARK: - Content View
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
@@ -60,6 +62,8 @@ struct ContentView: View {
         }
     }
 }
+
+// MARK: - Dashboard View
 
 struct DashboardView: View {
     @Environment(\.modelContext) private var modelContext
@@ -84,7 +88,7 @@ struct DashboardView: View {
                 LiquidGlass()
 
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
+                    VStack(alignment: .leading, spacing: DesignTokens.sectionSpacing) {
                         HeaderView(profile: profile)
 
                         if let routine = dailyRoutine {
@@ -92,32 +96,43 @@ struct DashboardView: View {
                                 Text("Routine of the Day")
                                     .font(.title2)
                                     .fontWeight(.bold)
+                                    .padding(.horizontal)
 
-                                NavigationLink(destination: RoutineDetailView(routine: routine, allExercises: allExercises, profile: profile, routineCompleted: {
-                                    profile?.completeRoutine()
-                                    refreshTrigger.toggle()
-                                })) {
+                                NavigationLink(destination: RoutineDetailView(
+                                    routine: routine,
+                                    allExercises: allExercises,
+                                    profile: profile,
+                                    routineCompleted: {
+                                        profile?.completeRoutine()
+                                        refreshTrigger.toggle()
+                                    }
+                                )) {
                                     DailyRoutineCard(routine: routine)
                                 }
-                                .buttonStyle(ScaleButtonStyle())
+                                .buttonStyle(DesignTokens.scaleButton)
+                                .padding(.horizontal)
                             }
-                            .padding(.horizontal)
                         }
 
-                        Text("Exercise Categories")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .padding(.horizontal)
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Exercise Categories")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .padding(.horizontal)
 
-                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 15) {
-                            ForEach(categories) { category in
-                                NavigationLink(destination: ExerciseListView(category: category, profile: profile)) {
-                                    CategoryCard(category: category)
+                            LazyVGrid(
+                                columns: [GridItem(.flexible()), GridItem(.flexible())],
+                                spacing: DesignTokens.gridSpacing
+                            ) {
+                                ForEach(categories) { category in
+                                    NavigationLink(destination: ExerciseListView(category: category, profile: profile)) {
+                                        CategoryCard(category: category)
+                                    }
+                                    .buttonStyle(DesignTokens.scaleButton)
                                 }
-                                .buttonStyle(ScaleButtonStyle())
                             }
+                            .padding(.horizontal)
                         }
-                        .padding(.horizontal)
 
                         StatsView(profile: profile)
                     }
@@ -137,6 +152,8 @@ struct DashboardView: View {
     }
 }
 
+// MARK: - Daily Routine Card
+
 struct DailyRoutineCard: View {
     let routine: Routine
 
@@ -145,10 +162,10 @@ struct DailyRoutineCard: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text(routine.name)
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                 Text(routine.routineDescription)
                     .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.9))
+                    .foregroundStyle(.white.opacity(0.9))
 
                 HStack {
                     Image(systemName: "play.circle.fill")
@@ -159,30 +176,30 @@ struct DailyRoutineCard: View {
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
                 .background(Color.white.opacity(0.2))
-                .foregroundColor(.white)
-                .cornerRadius(10)
+                .foregroundStyle(.white)
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 .padding(.top, 5)
             }
             Spacer()
             Image(systemName: "calendar.badge.clock")
                 .font(.system(size: 40))
-                .foregroundColor(.white.opacity(0.5))
+                .foregroundStyle(.white.opacity(0.6))
         }
-        .padding()
+        .padding(DesignTokens.cardPadding)
         .frame(maxWidth: .infinity)
         .background(
-            LiquidGlass()
-                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            LinearGradient(
+                colors: [.green, Color(red: 0.0, green: 0.6, blue: 0.3)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(Color.white.opacity(0.2), lineWidth: 1)
-        )
-        .cornerRadius(20)
-        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
-        .environment(\.colorScheme, .dark)
+        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.cardCornerRadius, style: .continuous))
+        .shadow(color: Color.green.opacity(0.25), radius: 10, x: 0, y: 5)
     }
 }
+
+// MARK: - Header View
 
 struct HeaderView: View {
     let profile: UserProfile?
@@ -192,15 +209,25 @@ struct HeaderView: View {
             VStack(alignment: .leading) {
                 Text("Ready for your daily?")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
-                Text(profile?.gender == .male ? "Keep it up!" : profile?.gender == .female ? "Stay strong!" : "Hello!")
+                    .foregroundStyle(.secondary)
+                Text(greeting)
                     .font(.title)
                     .fontWeight(.bold)
             }
         }
-        .padding()
+        .padding(.horizontal)
+    }
+
+    private var greeting: String {
+        switch profile?.gender {
+        case .male: return "Keep it up!"
+        case .female: return "Stay strong!"
+        default: return "Let's go!"
+        }
     }
 }
+
+// MARK: - Category Card
 
 struct CategoryCard: View {
     let category: ExerciseCategory
@@ -209,46 +236,44 @@ struct CategoryCard: View {
         VStack(spacing: 12) {
             Image(systemName: category.icon)
                 .font(.system(size: 30))
-                .foregroundColor(.white)
+                .foregroundStyle(.blue)
 
             Text(category.rawValue)
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundStyle(.primary)
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 120)
-        .background(
-            LiquidGlass()
-                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(Color.white.opacity(0.15), lineWidth: 1)
-        )
-        .cornerRadius(20)
-        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
-        .environment(\.colorScheme, .dark)
+        .frame(height: 110)
+        .padding(DesignTokens.cardPadding)
+        .cardStyle()
     }
 }
+
+// MARK: - Stats View
 
 struct StatsView: View {
     let profile: UserProfile?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 12) {
             Text("Your Progress")
                 .font(.title2)
                 .fontWeight(.bold)
+                .padding(.horizontal)
 
-            HStack(spacing: 20) {
+            HStack(spacing: 12) {
                 StatItem(title: "Streak", value: "\(profile?.streakCount ?? 0) days", icon: "flame.fill", color: .orange)
                 StatItem(title: "Level", value: "\(profile?.level ?? 1)", icon: "star.fill", color: .yellow)
                 StatItem(title: "XP", value: "\(profile?.xp ?? 0)", icon: "bolt.fill", color: .blue)
             }
+            .padding(DesignTokens.cardPadding)
+            .cardStyle()
+            .padding(.horizontal)
         }
-        .padding()
     }
 }
+
+// MARK: - Stat Item
 
 struct StatItem: View {
     let title: String
@@ -257,34 +282,22 @@ struct StatItem: View {
     let color: Color
 
     var body: some View {
-        VStack {
+        VStack(spacing: 6) {
             Image(systemName: icon)
-                .foregroundColor(color)
+                .foregroundStyle(color)
             Text(value)
                 .font(.headline)
             Text(title)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
-        .padding()
-        .background(Color(uiColor: .secondarySystemBackground))
-        .cornerRadius(15)
-        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
     }
 }
 
-// ButtonStyle to provide smooth tap scale animation for cards
-struct ScaleButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.96 : 1)
-            .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
-    }
-}
+// MARK: - Preview
 
 #Preview {
     ContentView()
         .modelContainer(for: Exercise.self, inMemory: true)
 }
-
