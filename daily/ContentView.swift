@@ -67,7 +67,7 @@ struct DashboardView: View {
     @Query private var allExercises: [Exercise]
 
     let profile: UserProfile?
-    let categories = ExerciseCategory.allCases
+    let categories = ExerciseCategory.displayCategories
 
     @State private var refreshTrigger = false
 
