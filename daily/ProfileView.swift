@@ -63,7 +63,7 @@ struct ProfileView: View {
         .sheet(isPresented: $showingImagePicker) {
             ImagePicker(image: $inputImage)
         }
-        .onChange(of: inputImage) { newImage in
+        .onChange(of: inputImage) { _, newImage in
             if let newImage = newImage {
                 profile?.setProfileImage(newImage)
             }
@@ -112,7 +112,7 @@ struct ProfileView: View {
                     }
                 }
                 .pickerStyle(.menu)
-                .onChange(of: selectedGender) { newValue in
+                .onChange(of: selectedGender) { _, newValue in
                     if let profile = profile {
                         profile.gender = newValue
                     }
@@ -149,7 +149,7 @@ struct ProfileView: View {
                 .font(.headline)
 
             Toggle("Enable daily reminder", isOn: $reminderEnabled)
-                .onChange(of: reminderEnabled) { isEnabled in
+                .onChange(of: reminderEnabled) { _, isEnabled in
                     if isEnabled {
                         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, _ in
                             DispatchQueue.main.async {
@@ -167,7 +167,7 @@ struct ProfileView: View {
 
             DatePicker("Reminder time", selection: reminderDate, displayedComponents: [.hourAndMinute])
                 .disabled(!reminderEnabled)
-                .onChange(of: reminderDate.wrappedValue) { _ in
+                .onChange(of: reminderDate.wrappedValue) { _, _ in
                     if reminderEnabled {
                         NotificationManager.shared.scheduleDailyReminder(at: reminderTime)
                     }

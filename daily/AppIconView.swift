@@ -35,16 +35,14 @@ struct AppIconView: View {
 
 // MARK: - Preview
 
-#Preview("Icon — 1024×1024") {
+#Preview("Icon — 1024×1024", traits: .sizeThatFitsLayout) {
     AppIconView()
         .frame(width: 1024, height: 1024)
         .clipShape(RoundedRectangle(cornerRadius: 224, style: .continuous))
-        .previewLayout(.sizeThatFits)
 }
 
-#Preview("Icon — Home Screen Size") {
+#Preview("Icon — Home Screen Size", traits: .sizeThatFitsLayout) {
     AppIconView()
         .frame(width: 180, height: 180)
         .clipShape(RoundedRectangle(cornerRadius: 40, style: .continuous))
-        .previewLayout(.sizeThatFits)
 }
