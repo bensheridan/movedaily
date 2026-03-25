@@ -1,4 +1,4 @@
-# daily
+# Move Daily
 
 A personal wellness iOS app that builds short, focused workout sessions every day — stretching, breathing, bodyweight, and balance — with voice-guided coaching and a progression system that unlocks longer sessions over time.
 

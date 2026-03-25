@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 @main
-struct dailyApp: App {
+struct MoveDailyApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             UserProfile.self,
