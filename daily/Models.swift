@@ -45,6 +45,81 @@ enum Difficulty: String, Codable, CaseIterable, Identifiable {
     var id: String { self.rawValue }
 }
 
+// MARK: - Experience Tier
+
+/// Derived tier based on `UserProfile.level`. Maps integer levels to named
+/// progression stages. Thresholds are calibrated so one routine/day (no streak
+/// bonuses) reaches Intermediate in ≈30 days and Advanced in ≈90 days.
+enum ExperienceTier: String, Codable, CaseIterable, Identifiable {
+    case beginner     = "Beginner"
+    case intermediate = "Intermediate"
+    case advanced     = "Advanced"
+
+    var id: String { rawValue }
+    var displayName: String { rawValue }
+
+    /// Level threshold at which users unlock Intermediate (≈30 days of daily activity).
+    static let intermediateLevel = 7
+    /// Level threshold at which users unlock Advanced (≈90 days of daily activity).
+    static let advancedLevel = 20
+
+    var icon: String {
+        switch self {
+        case .beginner:     return "figure.walk"
+        case .intermediate: return "figure.run"
+        case .advanced:     return "figure.run.circle.fill"
+        }
+    }
+}
+
+// MARK: - Session Tier
+
+/// A selectable session duration window. Each case is gated behind an `ExperienceTier`.
+enum SessionTier: String, CaseIterable, Identifiable {
+    case basic        = "10-12 min"
+    case intermediate = "15-20 min"
+    case advanced     = "20-30 min"
+
+    var id: String { rawValue }
+
+    /// Duration budget in seconds (lowerBound...upperBound). ±120 s tolerance on generation.
+    var durationRange: ClosedRange<Int> {
+        switch self {
+        case .basic:        return 600...720    // 10–12 min
+        case .intermediate: return 900...1200   // 15–20 min
+        case .advanced:     return 1200...1800  // 20–30 min
+        }
+    }
+
+    /// Minimum experience tier required to access this session tier.
+    var requiredExperienceTier: ExperienceTier {
+        switch self {
+        case .basic:        return .beginner
+        case .intermediate: return .intermediate
+        case .advanced:     return .advanced
+        }
+    }
+
+    /// Returns `true` when this session tier is accessible to the given profile.
+    func isUnlocked(for profile: UserProfile?) -> Bool {
+        guard let profile = profile else { return self == .basic }
+        switch self {
+        case .basic:        return true
+        case .intermediate: return profile.experienceTier != .beginner
+        case .advanced:     return profile.experienceTier == .advanced
+        }
+    }
+
+    /// Short label displayed on locked tier options.
+    var unlockLabel: String {
+        switch self {
+        case .basic:        return "Available"
+        case .intermediate: return "Unlocks at Intermediate (level \(ExperienceTier.intermediateLevel))"
+        case .advanced:     return "Unlocks at Advanced (level \(ExperienceTier.advancedLevel))"
+        }
+    }
+}
+
 @Model
 final class UserProfile {
     var gender: Gender
@@ -70,6 +145,13 @@ final class UserProfile {
         self.profileImageData = image.jpegData(compressionQuality: 0.9)
     }
 
+    /// The user's named progression tier, derived from their current `level`.
+    var experienceTier: ExperienceTier {
+        if level >= ExperienceTier.advancedLevel     { return .advanced }
+        if level >= ExperienceTier.intermediateLevel { return .intermediate }
+        return .beginner
+    }
+
     /**
      Call this when a routine is completed. This method updates XP, streak count, and level based on completion logic.
 
@@ -82,10 +164,14 @@ final class UserProfile {
      - Base XP is awarded on each completion.
      - Bonus XP (+50) is awarded when hitting streak milestones: 7, 30, and 100 days.
      - Level increases by 1 for every 100 XP accumulated, and XP rolls over properly.
+
+     - Returns: The new `ExperienceTier` if a tier boundary was crossed, `nil` otherwise.
      */
-    func completeRoutine(baseXP: Int = 20) {
+    @discardableResult
+    func completeRoutine(baseXP: Int = 20) -> ExperienceTier? {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
+        let tierBefore = experienceTier
 
         // Normalize last exercise date to start of day for comparison
         guard let lastExercise = lastExerciseDate else {
@@ -95,14 +181,15 @@ final class UserProfile {
             awardBonusXPIfNeeded()
             levelUpIfNeeded()
             lastExerciseDate = today
-            return
+            let tierAfter = experienceTier
+            return tierAfter != tierBefore ? tierAfter : nil
         }
 
         let lastDate = calendar.startOfDay(for: lastExercise)
 
         if lastDate == today {
             // Already completed today, no XP or streak update
-            return
+            return nil
         }
 
         let daysDifference = calendar.dateComponents([.day], from: lastDate, to: today).day ?? 0
@@ -122,6 +209,8 @@ final class UserProfile {
         awardBonusXPIfNeeded()
         levelUpIfNeeded()
         lastExerciseDate = today
+        let tierAfter = experienceTier
+        return tierAfter != tierBefore ? tierAfter : nil
     }
 
     private func awardBonusXPIfNeeded() {
@@ -181,6 +270,65 @@ final class Routine {
         self.name = name
         self.routineDescription = routineDescription
         self.exerciseNames = exerciseNames
+    }
+}
+
+// MARK: - Session Builder
+
+extension Routine {
+
+    /// Generates an ordered list of exercise names to fill the given session tier's
+    /// duration budget. Filters by profile gender focus, shuffles the pool, then
+    /// greedily selects exercises until the budget is reached.
+    ///
+    /// - Parameters:
+    ///   - tier: The target `SessionTier` defining the duration budget.
+    ///   - exercises: The full exercise pool (typically all seeded exercises).
+    ///   - profile: Optional user profile for gender-focus filtering.
+    /// - Returns: An ordered array of exercise names whose total `durationSeconds`
+    ///   falls within `tier.durationRange` (±120 s tolerance per FR-004).
+    static func buildSession(tier: SessionTier, exercises: [Exercise], profile: UserProfile?) -> [String] {
+        let budget = tier.durationRange
+
+        // 1. Filter by gender focus — include gender-neutral + matching exercises
+        let filtered = exercises.filter { exercise in
+            exercise.genderFocus == nil || exercise.genderFocus == profile?.gender
+        }
+
+        // 2. Shuffle for variety
+        let pool = filtered.shuffled()
+
+        // 3. Greedy fill: add exercises until the budget's lower bound is reached
+        var selected: [String] = []
+        var totalDuration = 0
+
+        for exercise in pool {
+            // Stop once we've reached the lower bound
+            if totalDuration >= budget.lowerBound { break }
+            // Accept if this exercise fits within the upper bound (+ 120 s tolerance)
+            if totalDuration + exercise.durationSeconds <= budget.upperBound + 120 {
+                selected.append(exercise.name)
+                totalDuration += exercise.durationSeconds
+            }
+        }
+
+        // 4. Fallback: pool exhausted before lower bound — allow repeats
+        //    (edge case; 61 exercises is sufficient for any tier)
+        if totalDuration < budget.lowerBound {
+            var fallback = pool
+            var guard_ = 0
+            while totalDuration < budget.lowerBound && guard_ < 200 {
+                if fallback.isEmpty { fallback = pool }
+                if let exercise = fallback.first {
+                    fallback.removeFirst()
+                    selected.append(exercise.name)
+                    totalDuration += exercise.durationSeconds
+                }
+                guard_ += 1
+            }
+        }
+
+        return selected
     }
 }
 

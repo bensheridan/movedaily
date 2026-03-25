@@ -128,6 +128,13 @@ struct ProfileView: View {
                 statChip(value: "\(profile?.level ?? 1)", label: "Level", icon: "star.fill", color: .yellow)
                 Divider().frame(height: 40)
                 statChip(value: "\(profile?.xp ?? 0)", label: "XP", icon: "bolt.fill", color: .blue)
+                Divider().frame(height: 40)
+                statChip(
+                    value: profile?.experienceTier.displayName ?? "Beginner",
+                    label: "Tier",
+                    icon: profile?.experienceTier.icon ?? "figure.walk",
+                    color: tierAccentColor
+                )
             }
         }
         .padding(DesignTokens.cardPadding)
@@ -200,6 +207,14 @@ struct ProfileView: View {
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
+    }
+
+    private var tierAccentColor: Color {
+        switch profile?.experienceTier {
+        case .intermediate: return .blue
+        case .advanced:     return .purple
+        default:            return .green
+        }
     }
 
     private func resetProfile() {
