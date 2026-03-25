@@ -21,7 +21,8 @@
         {
           "glass" : true,
           "image-name" : "AppIcon-1024.png",
-          "name" : "AppIcon-1024"
+          "name" : "AppIcon-1024",
+          "opacity" : 0.6
         }
       ],
       "shadow" : {
