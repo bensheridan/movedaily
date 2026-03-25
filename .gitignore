@@ -44,5 +44,8 @@ Icon?
 *.key
 *.pem
 
+# Claude Code local settings (machine-specific)
+.claude/settings.local.json
+
 # Speckit generated (optional — remove if you want to track specs)
 # specs/
