@@ -72,10 +72,24 @@ struct DashboardView: View {
     let profile: UserProfile?
     let categories = ExerciseCategory.displayCategories
 
+    @Query private var allPlans: [WorkoutPlan]
+
     @AppStorage("preferredSessionTierRaw") private var preferredSessionTierRaw: String = SessionTier.basic.rawValue
     @State private var sessionExerciseNames: [String] = []
     @State private var unlockedTier: ExperienceTier? = nil
     @State private var refreshTrigger = false
+    @State private var showingCustomBuilder = false
+    @State private var showingWeeklyPlanner = false
+    @State private var ignorePlanToday = false
+
+    var activePlan: WorkoutPlan? {
+        allPlans.first(where: { $0.isActive })
+    }
+
+    var todayPlanDay: PlanDay? {
+        let wd = Calendar.current.component(.weekday, from: Date())
+        return activePlan?.days.first(where: { $0.weekdays.contains(wd) })
+    }
 
     /// The effective session tier — respects the stored preference if unlocked,
     /// otherwise falls back to the highest available tier for this profile.
@@ -95,6 +109,20 @@ struct DashboardView: View {
             routineDescription: "\(selectedSessionTier.rawValue) · \(sessionExerciseNames.count) exercises",
             exerciseNames: sessionExerciseNames
         )
+    }
+
+    /// True when the user has active injuries AND the pool was reduced (fewer exercises than without injury filter).
+    private var injuryNoticeVisible: Bool {
+        guard let profile, !profile.activeInjuries.isEmpty else { return false }
+        let unfilteredCount = allExercises.filter {
+            $0.genderFocus == nil || $0.genderFocus == profile.gender
+        }.count
+        let filteredCount = allExercises.filter {
+            let genderOk = $0.genderFocus == nil || $0.genderFocus == profile.gender
+            let injuryOk = Set($0.contraindications).isDisjoint(with: Set(profile.activeInjuries))
+            return genderOk && injuryOk
+        }.count
+        return filteredCount < unfilteredCount
     }
 
     /// Builds (or rebuilds) the exercise list for the current tier and profile.
@@ -123,12 +151,42 @@ struct DashboardView: View {
                         )
                         .padding(.horizontal)
 
-                        if let routine = generatedRoutine {
+                        // Today's session area: plan day, rest day banner, or auto session
+                        if let planDay = todayPlanDay, !ignorePlanToday {
+                            TodaysPlanCard(
+                                activePlanName: activePlan?.name ?? "",
+                                planDay: planDay,
+                                allExercises: allExercises,
+                                profile: profile,
+                                onIgnore: { ignorePlanToday = true },
+                                routineCompleted: {
+                                    if let p = profile, let tier = p.completeRoutine() {
+                                        unlockedTier = tier
+                                    }
+                                    refreshTrigger.toggle()
+                                }
+                            )
+                        } else if activePlan != nil && todayPlanDay == nil && !ignorePlanToday {
+                            RestDayBanner(planName: activePlan?.name ?? "") {
+                                ignorePlanToday = true
+                            }
+                        } else if let routine = generatedRoutine {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("Today's Workout")
                                     .font(.title2)
                                     .fontWeight(.bold)
                                     .padding(.horizontal)
+
+                                if injuryNoticeVisible {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "bandage")
+                                            .foregroundStyle(.orange)
+                                        Text("Some exercises were removed due to your active injury.")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    .padding(.horizontal)
+                                }
 
                                 NavigationLink(destination: RoutineDetailView(
                                     routine: routine,
@@ -145,6 +203,32 @@ struct DashboardView: View {
                                     DailyRoutineCard(routine: routine)
                                 }
                                 .buttonStyle(DesignTokens.scaleButton)
+                                .padding(.horizontal)
+
+                                Button(action: { showingCustomBuilder = true }) {
+                                    Label("Build your own workout", systemImage: "slider.horizontal.3")
+                                        .font(.subheadline)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 10)
+                                        .background(Color(uiColor: .secondarySystemGroupedBackground))
+                                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                }
+                                .buttonStyle(DesignTokens.scaleButton)
+                                .padding(.horizontal)
+                            }
+                        } else if !(profile?.activeInjuries ?? []).isEmpty {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Today's Workout")
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+                                    .padding(.horizontal)
+                                HStack(spacing: 8) {
+                                    Image(systemName: "bandage")
+                                        .foregroundStyle(.orange)
+                                    Text("No exercises available for your current injury settings. Try adjusting your injury profile.")
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                }
                                 .padding(.horizontal)
                             }
                         }
@@ -177,6 +261,9 @@ struct DashboardView: View {
             .navigationTitle("Daily")
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    Button(action: { showingWeeklyPlanner = true }) {
+                        Image(systemName: "calendar.badge.plus")
+                    }
                     NavigationLink(destination: ProfileView()) {
                         Image(systemName: "person.crop.circle")
                     }
@@ -196,6 +283,12 @@ struct DashboardView: View {
             }
             .sheet(item: $unlockedTier) { tier in
                 LevelUpView(tier: tier)
+            }
+            .sheet(isPresented: $showingCustomBuilder) {
+                CustomWorkoutBuilderView(sessionTier: selectedSessionTier)
+            }
+            .sheet(isPresented: $showingWeeklyPlanner) {
+                WeeklyPlannerView()
             }
         }
     }
@@ -337,6 +430,185 @@ struct LevelUpView: View {
             .buttonStyle(DesignTokens.scaleButton)
             .padding(.horizontal, 24)
             .padding(.bottom, 40)
+        }
+    }
+}
+
+// MARK: - Synthetic Exercise Conversion
+
+func syntheticExercise(from pe: PlanExercise) -> Exercise {
+    Exercise(
+        name: pe.name,
+        exerciseDescription: pe.unit == "sets"
+            ? "\(pe.value) set\(pe.value == 1 ? "" : "s")"
+            : "\(pe.value) sec",
+        durationSeconds: pe.nominalSeconds,
+        category: .bodyweight,
+        instructions: [],
+        tips: []
+    )
+}
+
+// MARK: - Today's Plan Card
+
+struct TodaysPlanCard: View {
+    let activePlanName: String
+    let planDay: PlanDay
+    let allExercises: [Exercise]
+    let profile: UserProfile?
+    let onIgnore: () -> Void
+    var routineCompleted: (() -> Void)? = nil
+
+    @State private var navigateToDetail = false
+
+    private var syntheticExercises: [Exercise] {
+        planDay.exercises.map { syntheticExercise(from: $0) }
+    }
+
+    private var syntheticRoutine: Routine {
+        Routine(
+            name: planDay.name,
+            routineDescription: "\(activePlanName) · \(planDay.exercises.count) exercise\(planDay.exercises.count == 1 ? "" : "s")",
+            exerciseNames: planDay.exercises.map(\.name)
+        )
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Today's Workout")
+                .font(.title2)
+                .fontWeight(.bold)
+                .padding(.horizontal)
+
+            Text(activePlanName)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal)
+
+            NavigationLink(destination: RoutineDetailView(
+                routine: syntheticRoutine,
+                allExercises: allExercises + syntheticExercises,
+                profile: profile,
+                routineCompleted: routineCompleted
+            )) {
+                PlanDayCard(planDay: planDay)
+            }
+            .buttonStyle(DesignTokens.scaleButton)
+            .padding(.horizontal)
+
+            Button(action: onIgnore) {
+                Text("Not today — use auto session")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
+            }
+            .padding(.horizontal)
+        }
+    }
+}
+
+struct PlanDayCard: View {
+    let planDay: PlanDay
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(planDay.name)
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                    Text("\(planDay.exercises.count) exercise\(planDay.exercises.count == 1 ? "" : "s")")
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.85))
+                }
+                Spacer()
+                Image(systemName: "calendar.circle.fill")
+                    .font(.system(size: 40))
+                    .foregroundStyle(.white.opacity(0.6))
+            }
+
+            if !planDay.exercises.isEmpty {
+                let preview = planDay.exercises.prefix(3).map(\.name)
+                VStack(alignment: .leading, spacing: 2) {
+                    ForEach(preview, id: \.self) { name in
+                        Text("• \(name)")
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.85))
+                    }
+                    if planDay.exercises.count > 3 {
+                        Text("+ \(planDay.exercises.count - 3) more")
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.7))
+                    }
+                }
+            }
+
+            HStack {
+                Image(systemName: "play.circle.fill")
+                Text("Start Session")
+                    .font(.caption)
+                    .fontWeight(.bold)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(Color.white.opacity(0.2))
+            .foregroundStyle(.white)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .padding(.top, 4)
+        }
+        .padding(DesignTokens.cardPadding)
+        .frame(maxWidth: .infinity)
+        .background(
+            LinearGradient(
+                colors: [.blue, Color(red: 0.1, green: 0.3, blue: 0.9)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.cardCornerRadius, style: .continuous))
+        .shadow(color: Color.blue.opacity(0.3), radius: 10, x: 0, y: 5)
+    }
+}
+
+// MARK: - Rest Day Banner
+
+struct RestDayBanner: View {
+    let planName: String
+    let onAutoSession: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Today's Workout")
+                .font(.title2)
+                .fontWeight(.bold)
+                .padding(.horizontal)
+
+            HStack(spacing: 16) {
+                Image(systemName: "bed.double")
+                    .font(.system(size: 32))
+                    .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Rest day")
+                        .font(.headline)
+                    Text(planName)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+            }
+            .padding(DesignTokens.cardPadding)
+            .frame(maxWidth: .infinity)
+            .background(Color(uiColor: .secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.cardCornerRadius, style: .continuous))
+            .padding(.horizontal)
+
+            Button(action: onAutoSession) {
+                Text("Do an auto session instead")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
+            }
+            .padding(.horizontal)
         }
     }
 }
@@ -488,7 +760,7 @@ struct StatItem: View {
 
 #Preview("Content View") {
     ContentView()
-        .modelContainer(for: [Exercise.self, Routine.self, UserProfile.self], inMemory: true)
+        .modelContainer(for: [Exercise.self, Routine.self, UserProfile.self, CustomExercise.self, WorkoutPlan.self, PlanDay.self], inMemory: true)
 }
 
 #Preview("Session Tier Picker — Beginner") {

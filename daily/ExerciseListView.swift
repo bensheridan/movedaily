@@ -23,21 +23,43 @@ struct ExerciseListView: View {
             if exercises.isEmpty {
                 ExerciseEmptyState()
             } else {
-                ScrollView {
-                    LazyVStack(spacing: DesignTokens.gridSpacing) {
-                        ForEach(exercises) { exercise in
-                            NavigationLink(destination: ExerciseDetailView(exercise: exercise)) {
-                                ExerciseRowCard(exercise: exercise, category: category)
+                List {
+                    ForEach(exercises) { exercise in
+                        NavigationLink(destination: ExerciseDetailView(exercise: exercise)) {
+                            ExerciseRowCard(exercise: exercise, category: category)
+                        }
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            let isSaved = profile?.savedExerciseNames.contains(exercise.name) ?? false
+                            Button {
+                                toggleSaved(exercise)
+                            } label: {
+                                Label(
+                                    isSaved ? "Remove" : "Save to Custom",
+                                    systemImage: isSaved ? "bookmark.slash.fill" : "bookmark.fill"
+                                )
                             }
-                            .buttonStyle(PlainButtonStyle())
+                            .tint(isSaved ? .gray : .blue)
                         }
                     }
-                    .padding(DesignTokens.cardPadding)
                 }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
             }
         }
         .background(Color(uiColor: .systemGroupedBackground))
         .navigationTitle(category.rawValue)
+    }
+
+    private func toggleSaved(_ exercise: Exercise) {
+        guard let profile else { return }
+        if profile.savedExerciseNames.contains(exercise.name) {
+            profile.savedExerciseNames.removeAll { $0 == exercise.name }
+        } else {
+            profile.savedExerciseNames.append(exercise.name)
+        }
     }
 }
 

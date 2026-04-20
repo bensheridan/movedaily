@@ -72,6 +72,41 @@ enum ExperienceTier: String, Codable, CaseIterable, Identifiable {
     }
 }
 
+// MARK: - Injury Type
+
+enum InjuryType: String, CaseIterable, Identifiable, Codable {
+    case lowerBack   = "lower_back"
+    case shoulder    = "shoulder"
+    case knee        = "knee"
+    case wristElbow  = "wrist_elbow"
+    case ankleFoot   = "ankle_foot"
+    case neck        = "neck"
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .lowerBack:  return "Lower Back"
+        case .shoulder:   return "Shoulder / Rotator Cuff"
+        case .knee:       return "Knee"
+        case .wristElbow: return "Wrist / Elbow"
+        case .ankleFoot:  return "Ankle / Foot"
+        case .neck:       return "Neck / Cervical"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .lowerBack:  return "figure.walk"
+        case .shoulder:   return "figure.arms.open"
+        case .knee:       return "figure.run"
+        case .wristElbow: return "hand.raised"
+        case .ankleFoot:  return "figure.stand"
+        case .neck:       return "person.bust"
+        }
+    }
+}
+
 // MARK: - Session Tier
 
 /// A selectable session duration window. Each case is gated behind an `ExperienceTier`.
@@ -128,6 +163,9 @@ final class UserProfile {
     var streakCount: Int
     var lastExerciseDate: Date?
     var profileImageData: Data?
+
+    var activeInjuries: [String] = []
+    var savedExerciseNames: [String] = []
 
     init(gender: Gender = .unspecified, xp: Int = 0, level: Int = 1, streakCount: Int = 0) {
         self.gender = gender
@@ -238,6 +276,7 @@ final class Exercise {
     var instructions: [String]
     var tips: [String]
     var audioCues: [Int: String] // Timestamp in seconds to text
+    var contraindications: [String] = []
 
     init(name: String,
          exerciseDescription: String,
@@ -247,7 +286,8 @@ final class Exercise {
          tips: [String] = [],
          audioCues: [Int: String] = [:],
          difficulty: Difficulty = .beginner,
-         genderFocus: Gender? = nil) {
+         genderFocus: Gender? = nil,
+         contraindications: [String] = []) {
         self.name = name
         self.exerciseDescription = exerciseDescription
         self.durationSeconds = durationSeconds
@@ -257,6 +297,7 @@ final class Exercise {
         self.instructions = instructions
         self.tips = tips
         self.audioCues = audioCues
+        self.contraindications = contraindications
     }
 }
 
@@ -270,6 +311,61 @@ final class Routine {
         self.name = name
         self.routineDescription = routineDescription
         self.exerciseNames = exerciseNames
+    }
+}
+
+// MARK: - Weekly Plan Models
+
+struct PlanExercise: Codable {
+    var name: String
+    var value: Int
+    var unit: String  // "sets" or "seconds"
+
+    var nominalSeconds: Int {
+        unit == "sets" ? value * 45 : value
+    }
+}
+
+@Model
+final class WorkoutPlan {
+    var name: String
+    var isActive: Bool = false
+    var createdAt: Date = Date()
+    @Relationship(deleteRule: .cascade, inverse: \PlanDay.plan)
+    var days: [PlanDay] = []
+
+    init(name: String) {
+        self.name = name
+    }
+}
+
+@Model
+final class PlanDay {
+    var name: String
+    /// Calendar.weekday values: 1=Sunday, 2=Monday … 7=Saturday.
+    var weekdays: [Int] = []
+    var exercises: [PlanExercise] = []
+    var plan: WorkoutPlan?
+
+    init(name: String, weekdays: [Int] = [], exercises: [PlanExercise] = []) {
+        self.name = name
+        self.weekdays = weekdays
+        self.exercises = exercises
+    }
+}
+
+// MARK: - Custom Exercise
+
+@Model
+final class CustomExercise {
+    var name: String
+    var durationSeconds: Int
+    var unit: String = "seconds"  // "seconds" or "sets"
+
+    init(name: String, durationSeconds: Int, unit: String = "seconds") {
+        self.name = name
+        self.durationSeconds = durationSeconds
+        self.unit = unit
     }
 }
 
@@ -291,8 +387,11 @@ extension Routine {
         let budget = tier.durationRange
 
         // 1. Filter by gender focus — include gender-neutral + matching exercises
+        let activeInjuries = Set(profile?.activeInjuries ?? [])
         let filtered = exercises.filter { exercise in
-            exercise.genderFocus == nil || exercise.genderFocus == profile?.gender
+            let genderOk = exercise.genderFocus == nil || exercise.genderFocus == profile?.gender
+            let injuryOk = activeInjuries.isEmpty || Set(exercise.contraindications).isDisjoint(with: activeInjuries)
+            return genderOk && injuryOk
         }
 
         // 2. Shuffle for variety
@@ -350,6 +449,7 @@ extension Exercise {
                 + bodyweightExercises()
                 + kegelExercises()   // seeded with .stretching category
                 + balanceExercises()
+            applyContraindications(to: allExercises)
             for exercise in allExercises {
                 context.insert(exercise)
             }
@@ -381,6 +481,74 @@ extension Exercise {
             + balanceExercises()
         for exercise in newExercises where !existingNames.contains(exercise.name) {
             context.insert(exercise)
+        }
+
+        // 3. Apply contraindications to all exercises (idempotent — safe to re-run)
+        let allExercises = exercises + newExercises.filter { !existingNames.contains($0.name) }
+        applyContraindications(to: allExercises)
+    }
+
+    /// Sets contraindication tags on exercises by name. Safe to call multiple times.
+    static func applyContraindications(to exercises: [Exercise]) {
+        let lb = InjuryType.lowerBack.rawValue
+        let sh = InjuryType.shoulder.rawValue
+        let kn = InjuryType.knee.rawValue
+        let we = InjuryType.wristElbow.rawValue
+        let af = InjuryType.ankleFoot.rawValue
+        let nk = InjuryType.neck.rawValue
+
+        let map: [String: [String]] = [
+            // Stretching
+            "Neck Tilts":               [nk],
+            "Shoulder Rolls":           [sh],
+            "Chest Stretch (Doorway)":  [sh],
+            "Cat-Cow":                  [lb],
+            "Triceps Stretch":          [sh, we],
+            "Hamstring Stretch":        [lb, kn],
+            "Quadriceps Stretch":       [kn, af],
+            "Calf Stretch":             [af],
+            "Hip Flexor Stretch":       [kn, lb],
+            "Figure-4 Stretch":         [kn, lb],
+            "Butterfly Stretch":        [kn],
+            "Child's Pose":             [lb, kn, we],
+            "IT Band Stretch":          [kn, af],
+            "Wrist & Forearm Stretch":  [we],
+            "Pigeon Pose":              [kn, lb, af],
+            "Seated Spinal Twist":      [lb],
+            // Bodyweight
+            "Push-ups":                 [sh, we],
+            "Knee Push-ups":            [sh, we],
+            "Plank Shoulder Taps":      [sh, we],
+            "Triceps Dips":             [sh, we],
+            "Arm Circles":              [sh],
+            "Inchworm Walks":           [sh, we, lb],
+            "Front Plank":              [sh, we, lb],
+            "Side Plank":               [sh, we],
+            "Bicycle Crunches":         [lb, nk],
+            "Leg Raises":               [lb],
+            "Mountain Climbers":        [sh, we, lb],
+            "Squats":                   [kn, af],
+            "Lunges":                   [kn, af],
+            "Calf Raises":              [af],
+            "Wall Sit":                 [kn],
+            "Burpees":                  [sh, we, kn, af, lb],
+            "Diamond Push-ups":         [sh, we],
+            "Jump Squats":              [kn, af],
+            "Superman Hold":            [lb],
+            "Dead Bug":                 [lb],
+            "Bird Dog":                 [lb],
+            // Balance
+            "Single-Leg Stand":         [kn, af],
+            "Heel-to-Toe Walk":         [af, kn],
+            "Tree Pose":                [kn, af],
+            "Standing Knee Lifts":      [kn, af],
+            "Clock Reach":              [kn, af],
+        ]
+
+        for exercise in exercises {
+            if let tags = map[exercise.name] {
+                exercise.contraindications = tags
+            }
         }
     }
 
