@@ -135,6 +135,16 @@ struct ExerciseProgressCard: View {
     var isCompleted: Bool { index < currentIndex }
     var isCurrent: Bool { index == currentIndex }
 
+    /// Shows "20 sets" or "30 sec" for plan-imported exercises; falls back to "X min" for timed library exercises.
+    var durationLabel: String {
+        let desc = exercise.exerciseDescription.trimmingCharacters(in: .whitespaces)
+        if desc.range(of: #"^\d+\s*(sets?|sec)$"#, options: [.regularExpression, .caseInsensitive]) != nil {
+            return desc
+        }
+        let mins = exercise.durationSeconds / 60
+        return mins > 0 ? "\(mins) min" : "\(exercise.durationSeconds) sec"
+    }
+
     var body: some View {
         HStack(spacing: 14) {
             // Step indicator
@@ -164,7 +174,7 @@ struct ExerciseProgressCard: View {
                 Text(exercise.name)
                     .font(.headline)
                     .foregroundStyle(isCurrent ? .primary : (isCompleted ? .secondary : .primary))
-                Text("\(exercise.durationSeconds / 60) min")
+                Text(durationLabel)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

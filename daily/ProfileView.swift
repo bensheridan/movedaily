@@ -13,6 +13,7 @@ struct ProfileView: View {
     @State private var selectedGender: Gender = .unspecified
     @State private var showingResetAlert = false
     @State private var showingImagePicker = false
+    @State private var showingInjuryPicker = false
     @State private var inputImage: UIImage?
 
     @AppStorage("reminderEnabled") private var reminderEnabled = false
@@ -41,6 +42,7 @@ struct ProfileView: View {
         ScrollView {
             VStack(spacing: DesignTokens.sectionSpacing) {
                 profileHeroCard
+                injuryCard
                 remindersCard
                 resetCard
             }
@@ -62,6 +64,9 @@ struct ProfileView: View {
         }
         .sheet(isPresented: $showingImagePicker) {
             ImagePicker(image: $inputImage)
+        }
+        .sheet(isPresented: $showingInjuryPicker) {
+            InjuryPickerView()
         }
         .onChange(of: inputImage) { _, newImage in
             if let newImage = newImage {
@@ -135,6 +140,40 @@ struct ProfileView: View {
                     icon: profile?.experienceTier.icon ?? "figure.walk",
                     color: tierAccentColor
                 )
+            }
+        }
+        .padding(DesignTokens.cardPadding)
+        .cardStyle()
+    }
+
+    // MARK: - Injury Card
+
+    private var injuryCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                Text("Active Injuries")
+                    .font(.headline)
+                Spacer()
+                Button("Edit") { showingInjuryPicker = true }
+                    .font(.subheadline)
+            }
+
+            let injuries = profile?.activeInjuries
+                .compactMap { InjuryType(rawValue: $0) }
+                .map(\.displayName) ?? []
+
+            if injuries.isEmpty {
+                Text("None")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            } else {
+                VStack(alignment: .leading, spacing: 6) {
+                    ForEach(injuries, id: \.self) { name in
+                        Label(name, systemImage: "bandage")
+                            .font(.subheadline)
+                            .foregroundStyle(.orange)
+                    }
+                }
             }
         }
         .padding(DesignTokens.cardPadding)
