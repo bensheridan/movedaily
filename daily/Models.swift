@@ -447,7 +447,6 @@ extension Exercise {
             let allExercises = stretchingExercises()
                 + breathingExercises()
                 + bodyweightExercises()
-                + kegelExercises()   // seeded with .stretching category
                 + balanceExercises()
             applyContraindications(to: allExercises)
             for exercise in allExercises {
@@ -486,6 +485,14 @@ extension Exercise {
         // 3. Apply contraindications to all exercises (idempotent — safe to re-run)
         let allExercises = exercises + newExercises.filter { !existingNames.contains($0.name) }
         applyContraindications(to: allExercises)
+
+        // 4. Insert new routines that don't already exist (checked by name)
+        if let existingRoutines = try? context.fetch(FetchDescriptor<Routine>()) {
+            let existingRoutineNames = Set(existingRoutines.map { $0.name })
+            for routine in routines() where !existingRoutineNames.contains(routine.name) {
+                context.insert(routine)
+            }
+        }
     }
 
     /// Sets contraindication tags on exercises by name. Safe to call multiple times.
@@ -855,27 +862,6 @@ extension Exercise {
         ]
     }
 
-    // MARK: - Kegel Exercises (now categorised under Stretching)
-
-    /// Pelvic-floor exercises. Category is `.stretching` so they appear under
-    /// Stretching on the dashboard (not under the legacy `.kegels` case).
-    private static func kegelExercises() -> [Exercise] {
-        [
-            // Universal / Initial Identification
-            Exercise(name: "Muscle Discovery", exerciseDescription: "Find your pelvic floor muscles.", durationSeconds: 60, category: .stretching, instructions: ["Imagine stopping urine midstream.", "Tighten as if stopping gas.", "Feel the lift and squeeze."], tips: ["Sit or lie down at first.", "Isolate the muscle.", "Don't hold your breath."], audioCues: [0: "Squeeze to find the muscle.", 5: "Now relax completely.", 20: "Squeeze and feel the lift.", 35: "Relax — release any tension.", 50: "Almost there."]),
-
-            // Male Focus
-            Exercise(name: "Standard Kegels", exerciseDescription: "Long holds for endurance.", durationSeconds: 120, category: .stretching, instructions: ["Imagine pulling your scrotum up.", "Squeeze for 3-5 seconds.", "Relax for 3-5 seconds."], tips: ["Count out loud to breathe.", "Don't squeeze your butt.", "Relax your thighs."], audioCues: [0: "Lift and hold — five seconds.", 5: "Relax for five.", 10: "Squeeze and hold again.", 20: "Relax — breathe normally.", 30: "Lift and hold — five seconds.", 50: "Relax completely.", 60: "Squeeze and hold.", 80: "Hold — five more seconds.", 95: "Relax and breathe.", 110: "Last few seconds — finish strong."], genderFocus: .male),
-
-            Exercise(name: "Power Pulses", exerciseDescription: "Fast power reps.", durationSeconds: 60, category: .stretching, instructions: ["Quickly squeeze and relax.", "Aim for 1 pulse per second."], tips: ["Flicker sensation.", "Keep it isolated.", "Breath normally."], audioCues: [0: "Quick pulses — start now.", 1: "Squeeze, relax.", 2: "Squeeze, relax.", 30: "Keep the rhythm going.", 50: "Almost there."], genderFocus: .male),
-
-            // Female Focus
-            Exercise(name: "Standard Kegels", exerciseDescription: "Pelvic floor endurance.", durationSeconds: 120, category: .stretching, instructions: ["Contract the pelvic floor.", "Squeeze for 3-5 seconds.", "Relax for 3-5 seconds."], tips: ["Imagine an elevator lift.", "Don't hold your breath.", "Keep core relaxed."], audioCues: [0: "Squeeze and lift the pelvic floor.", 5: "Now relax completely.", 15: "Squeeze — hold for five.", 25: "Relax fully.", 40: "Lift and squeeze — hold five.", 55: "Relax — breathe normally.", 70: "Squeeze and hold.", 85: "Relax fully.", 95: "One more hold — lift and squeeze.", 110: "Last few seconds — finish strong."], genderFocus: .female),
-
-            Exercise(name: "Elevator Kegels", exerciseDescription: "Gradual control.", durationSeconds: 120, category: .stretching, instructions: ["Squeeze in 3 stages.", "Relax in 3 stages."], tips: ["Control is key.", "Smooth movement.", "Don't push down."], audioCues: [0: "Stage one — gentle squeeze.", 5: "Stage two — hold.", 10: "Stage three — squeeze tight.", 15: "Release down through each stage.", 25: "Reset — stage one.", 35: "Stage two — hold.", 45: "Stage three — squeeze tight.", 55: "Release back down.", 70: "Stage one squeeze — fresh set.", 80: "Stage two.", 90: "Stage three — hold tight.", 100: "Release all the way down.", 110: "Almost there."], genderFocus: .female)
-        ]
-    }
-
     // MARK: - Balance Exercises (new category — 002-exercise-review)
 
     /// Balance exercises focused on stability, proprioception, and fall prevention.
@@ -1040,10 +1026,21 @@ extension Exercise {
 
     private static func routines() -> [Routine] {
         [
+            // Existing
             Routine(name: "Morning Wake-Up", routineDescription: "8 min sequence to start the day.", exerciseNames: ["Neck Tilts", "Cat-Cow", "Hamstring Stretch", "Box Breathing"]),
             Routine(name: "Core & Mobility", routineDescription: "12 min focus on stability.", exerciseNames: ["Front Plank", "Glute Bridges", "Side Reach Stretch", "Belly Breathing"]),
-            Routine(name: "Relax & De-Stress", routineDescription: "5 min evening wind-down.", exerciseNames: ["Child's Pose", "Side Reach Stretch", "4-7-8 Breathing", "Standard Kegels"]),
-            Routine(name: "Full Body Strength", routineDescription: "15 min workout.", exerciseNames: ["Squats", "Push-ups", "Mountain Climbers", "Wall Sit", "Alternate Nostril Breathing"])
+            Routine(name: "Relax & De-Stress", routineDescription: "5 min evening wind-down.", exerciseNames: ["Child's Pose", "Side Reach Stretch", "4-7-8 Breathing"]),
+            Routine(name: "Full Body Strength", routineDescription: "15 min workout.", exerciseNames: ["Squats", "Push-ups", "Mountain Climbers", "Wall Sit", "Alternate Nostril Breathing"]),
+
+            // New
+            Routine(name: "Desk Break", routineDescription: "5 min relief for office workers.", exerciseNames: ["Shoulder Rolls", "Neck Tilts", "Wrist & Forearm Stretch", "Chest Stretch (Doorway)", "Pursed Lip Breathing"]),
+            Routine(name: "Lower Body Burn", routineDescription: "12 min legs and glutes focus.", exerciseNames: ["Squats", "Lunges", "Glute Bridges", "Calf Raises", "Clamshells"]),
+            Routine(name: "Balance & Stability", routineDescription: "10 min fall-prevention training.", exerciseNames: ["Single-Leg Stand", "Heel-to-Toe Walk", "Weight Shifts", "Standing Knee Lifts", "Clock Reach"]),
+            Routine(name: "Deep Stretch", routineDescription: "15 min full-body flexibility.", exerciseNames: ["Cat-Cow", "Butterfly Stretch", "Figure-4 Stretch", "Hip Flexor Stretch", "IT Band Stretch", "Seated Spinal Twist", "Child's Pose"]),
+            Routine(name: "Power Circuit", routineDescription: "20 min high-intensity circuit.", exerciseNames: ["Jump Squats", "Burpees", "Mountain Climbers", "Push-ups", "Bicycle Crunches", "Plank Shoulder Taps", "Box Breathing"]),
+            Routine(name: "Breathwork & Calm", routineDescription: "8 min breathing and relaxation.", exerciseNames: ["Belly Breathing", "4-7-8 Breathing", "Resonant Breathing", "Progressive Relaxation"]),
+            Routine(name: "Upper Body Strength", routineDescription: "12 min arms, chest, and back.", exerciseNames: ["Push-ups", "Diamond Push-ups", "Triceps Dips", "Plank Shoulder Taps", "Superman Hold", "Arm Circles"]),
+            Routine(name: "Gentle Morning", routineDescription: "10 min low-impact wake-up.", exerciseNames: ["Shoulder Rolls", "Neck Tilts", "Cat-Cow", "Side Reach Stretch", "Hamstring Stretch", "Belly Breathing"])
         ]
     }
 }
