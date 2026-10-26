@@ -30,6 +30,19 @@ struct RoutineDetailView: View {
         return "Continue Routine"
     }
 
+    /// Restores today's progress so a routine can be finished in pieces through the day.
+    private func restoreProgress() {
+        let done = RoutineProgressStore.completedToday(for: routine.name)
+        currentExerciseIndex = routineExercises.prefix { done.contains($0.name) }.count
+    }
+
+    private func saveProgress() {
+        RoutineProgressStore.save(
+            completed: routineExercises.prefix(currentExerciseIndex).map(\.name),
+            for: routine.name
+        )
+    }
+
     var body: some View {
         ScrollView {
             LazyVStack(spacing: DesignTokens.sectionSpacing) {
@@ -41,6 +54,12 @@ struct RoutineDetailView: View {
                     Text(routine.routineDescription)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
+                    if currentExerciseIndex > 0 && !isCompleted {
+                        Label("\(currentExerciseIndex) of \(routineExercises.count) done today — pick up any time", systemImage: "clock.arrow.circlepath")
+                            .font(.caption)
+                            .foregroundStyle(.blue)
+                            .padding(.top, 2)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(DesignTokens.cardPadding)
@@ -76,6 +95,7 @@ struct RoutineDetailView: View {
                 if isCompleted {
                     Button("Reset & Start Over") {
                         currentExerciseIndex = 0
+                        saveProgress()
                     }
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
@@ -103,6 +123,7 @@ struct RoutineDetailView: View {
         .background(Color(uiColor: .systemGroupedBackground))
         .navigationTitle(routine.name)
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear { restoreProgress() }
         .sheet(isPresented: $showingExercise) {
             if currentExerciseIndex < routineExercises.count {
                 NavigationView {
@@ -111,6 +132,7 @@ struct RoutineDetailView: View {
                             ToolbarItem(placement: .navigationBarLeading) {
                                 Button("Finish") {
                                     currentExerciseIndex += 1
+                                    saveProgress()
                                     if currentExerciseIndex == routineExercises.count {
                                         routineCompleted?()
                                     }
@@ -120,6 +142,33 @@ struct RoutineDetailView: View {
                         }
                 }
             }
+        }
+    }
+}
+
+// MARK: - Routine Progress Store
+
+/// Remembers which exercises of each routine were finished today (UserDefaults, keyed by
+/// routine name). Progress from an earlier day is ignored, so routines start fresh each day.
+enum RoutineProgressStore {
+    private struct Entry: Codable {
+        var day: Date
+        var completed: [String]
+    }
+
+    private static func key(_ routineName: String) -> String { "routineProgress.\(routineName)" }
+
+    static func completedToday(for routineName: String) -> Set<String> {
+        guard let data = UserDefaults.standard.data(forKey: key(routineName)),
+              let entry = try? JSONDecoder().decode(Entry.self, from: data),
+              Calendar.current.isDateInToday(entry.day) else { return [] }
+        return Set(entry.completed)
+    }
+
+    static func save(completed: [String], for routineName: String) {
+        let entry = Entry(day: Date(), completed: completed)
+        if let data = try? JSONEncoder().encode(entry) {
+            UserDefaults.standard.set(data, forKey: key(routineName))
         }
     }
 }
