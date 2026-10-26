@@ -1348,7 +1348,12 @@ extension Exercise {
             Routine(name: "Power Circuit", routineDescription: "20 min high-intensity circuit.", exerciseNames: ["Jump Squats", "Burpees", "Mountain Climbers", "Push-ups", "Bicycle Crunches", "Plank Shoulder Taps", "Box Breathing"]),
             Routine(name: "Breathwork & Calm", routineDescription: "8 min breathing and relaxation.", exerciseNames: ["Belly Breathing", "4-7-8 Breathing", "Resonant Breathing", "Progressive Relaxation"]),
             Routine(name: "Upper Body Strength", routineDescription: "12 min arms, chest, and back.", exerciseNames: ["Push-ups", "Diamond Push-ups", "Triceps Dips", "Plank Shoulder Taps", "Superman Hold", "Arm Circles"]),
-            Routine(name: "Gentle Morning", routineDescription: "10 min low-impact wake-up.", exerciseNames: ["Shoulder Rolls", "Neck Tilts", "Cat-Cow", "Side Reach Stretch", "Hamstring Stretch", "Belly Breathing"])
+            Routine(name: "Gentle Morning", routineDescription: "10 min low-impact wake-up.", exerciseNames: ["Shoulder Rolls", "Neck Tilts", "Cat-Cow", "Side Reach Stretch", "Hamstring Stretch", "Belly Breathing"]),
+
+            // Targeted relief (008)
+            Routine(name: "Frozen Shoulder Relief", routineDescription: "Gentle stretches to free up a locked shoulder.", exerciseNames: ["Pendulum Swing", "Finger Wall Walk", "Cross-Body Arm Stretch", "Towel Stretch", "Outward Rotation Stretch", "Armpit Stretch"]),
+            Routine(name: "Reflux Breathing", routineDescription: "Strengthen your diaphragm to help with reflux.", exerciseNames: ["Seated Diaphragm Breathing", "360° Rib Breathing", "Diaphragm Breathing (Lying)", "Weighted Belly Breathing"]),
+            Routine(name: "Lower Back Relief", routineDescription: "Ease a stiff or sore lower back.", exerciseNames: ["Cat-Cow", "Seated Spinal Twist", "Bird Dog", "Child's Pose", "Figure-4 Stretch", "Belly Breathing"])
         ]
     }
 }

@@ -233,6 +233,17 @@ struct DashboardView: View {
                             }
                         }
 
+                        ProgramsSection(
+                            allExercises: allExercises,
+                            profile: profile,
+                            routineCompleted: {
+                                if let p = profile, let tier = p.completeRoutine() {
+                                    unlockedTier = tier
+                                }
+                                refreshTrigger.toggle()
+                            }
+                        )
+
                         ThisForThatSection()
 
                         VStack(alignment: .leading, spacing: 12) {
