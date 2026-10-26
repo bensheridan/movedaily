@@ -1044,3 +1044,105 @@ extension Exercise {
         ]
     }
 }
+
+// MARK: - This for That
+
+/// A habit-forming pact: do "This" (an exercise or habit) to earn "That" (a treat).
+/// Per-session pacts bank a treat every `targetCount` completions; weekly pacts bank one
+/// treat per calendar week once "This" is done on `targetCount` different days.
+@Model
+final class ThisForThat {
+    var thisAction: String
+    var thatTreat: String
+    var treatIcon: String = "gift.fill"
+    var timesEarned: Int = 0
+    var timesClaimed: Int = 0
+    var lastEarnedAt: Date?
+    var createdAt: Date = Date()
+
+    var isWeekly: Bool = false
+    var targetCount: Int = 1
+    /// Per-session progress towards the next treat.
+    var sessionProgress: Int = 0
+    var completionDates: [Date] = []
+    /// Start of the week a weekly treat was last awarded, so it's only earned once per week.
+    var rewardedWeekStart: Date?
+
+    init(thisAction: String, thatTreat: String, treatIcon: String = "gift.fill", isWeekly: Bool = false, targetCount: Int = 1) {
+        self.thisAction = thisAction
+        self.thatTreat = thatTreat
+        self.treatIcon = treatIcon
+        self.isWeekly = isWeekly
+        self.targetCount = targetCount
+    }
+
+    /// Treats earned but not yet enjoyed.
+    var bankedTreats: Int { max(timesEarned - timesClaimed, 0) }
+
+    var doneToday: Bool {
+        completionDates.contains { Calendar.current.isDateInToday($0) }
+    }
+
+    static var currentWeek: DateInterval {
+        Calendar.current.dateInterval(of: .weekOfYear, for: Date())
+            ?? DateInterval(start: Calendar.current.startOfDay(for: Date()), duration: 7 * 86_400)
+    }
+
+    /// The seven days of the current week, in the user's locale order.
+    static var currentWeekDays: [Date] {
+        (0..<7).compactMap { Calendar.current.date(byAdding: .day, value: $0, to: currentWeek.start) }
+    }
+
+    /// Distinct days in the current week on which "This" was done.
+    var daysDoneThisWeek: Set<Date> {
+        let week = Self.currentWeek
+        return Set(completionDates.filter { week.contains($0) }.map { Calendar.current.startOfDay(for: $0) })
+    }
+
+    var rewardedThisWeek: Bool {
+        rewardedWeekStart == Self.currentWeek.start
+    }
+
+    /// Progress towards the next treat, as (done, target).
+    var progress: (done: Int, target: Int) {
+        isWeekly ? (min(daysDoneThisWeek.count, targetCount), targetCount) : (sessionProgress, targetCount)
+    }
+
+    var goalLabel: String {
+        if isWeekly {
+            return "\(targetCount) day\(targetCount == 1 ? "" : "s") a week"
+        }
+        return targetCount == 1 ? "Every time" : "Every \(targetCount) times"
+    }
+
+    /// Records a completion. Returns true when this completion earned a treat.
+    @discardableResult
+    func markDone() -> Bool {
+        if isWeekly {
+            guard !doneToday else { return false }
+            completionDates.append(Date())
+            guard !rewardedThisWeek, daysDoneThisWeek.count >= targetCount else { return false }
+            rewardedWeekStart = Self.currentWeek.start
+        } else {
+            completionDates.append(Date())
+            sessionProgress += 1
+            guard sessionProgress >= targetCount else { return false }
+            sessionProgress = 0
+        }
+        timesEarned += 1
+        lastEarnedAt = Date()
+        return true
+    }
+
+    func claimTreat() {
+        guard bankedTreats > 0 else { return }
+        timesClaimed += 1
+    }
+
+    /// SF Symbols offered when picking a treat icon.
+    static let treatIcons = [
+        "gift.fill", "birthday.cake.fill", "cup.and.saucer.fill", "mug.fill", "takeoutbag.and.cup.and.straw.fill",
+        "fork.knife", "wineglass.fill", "tv.fill", "gamecontroller.fill", "music.note",
+        "book.fill", "bag.fill", "bed.double.fill", "sparkles",
+    ]
+}

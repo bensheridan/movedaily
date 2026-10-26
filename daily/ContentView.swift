@@ -233,6 +233,8 @@ struct DashboardView: View {
                             }
                         }
 
+                        ThisForThatSection()
+
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Exercise Categories")
                                 .font(.title2)
@@ -760,7 +762,7 @@ struct StatItem: View {
 
 #Preview("Content View") {
     ContentView()
-        .modelContainer(for: [Exercise.self, Routine.self, UserProfile.self, CustomExercise.self, WorkoutPlan.self, PlanDay.self], inMemory: true)
+        .modelContainer(for: [Exercise.self, Routine.self, UserProfile.self, CustomExercise.self, WorkoutPlan.self, PlanDay.self, ThisForThat.self], inMemory: true)
 }
 
 #Preview("Session Tier Picker — Beginner") {
