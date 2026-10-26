@@ -7,6 +7,8 @@ import SwiftData
 struct ThisForThatSection: View {
     @Query(sort: \ThisForThat.createdAt, order: .forward) private var pacts: [ThisForThat]
     @Query private var allExercises: [Exercise]
+    @Query private var routines: [Routine]
+    @Query private var profiles: [UserProfile]
 
     @State private var showingManager = false
     @State private var showingNewPact = false
@@ -34,6 +36,9 @@ struct ThisForThatSection: View {
                         ThisForThatRow(
                             pact: pact,
                             exercise: allExercises.first { $0.name == pact.thisAction },
+                            routine: routines.first { $0.name == pact.thisAction },
+                            allExercises: allExercises,
+                            profile: profiles.first,
                             onDone: {
                                 if pact.markDone() {
                                     earnedPact = pact
@@ -89,8 +94,11 @@ struct ThisForThatSection: View {
 
 struct ThisForThatRow: View {
     let pact: ThisForThat
-    /// The library exercise matching "This", if any — lets the user jump straight into the timer.
+    /// The library exercise or program matching "This", if any — lets the user jump straight into it.
     let exercise: Exercise?
+    let routine: Routine?
+    let allExercises: [Exercise]
+    let profile: UserProfile?
     let onDone: () -> Void
 
     var body: some View {
@@ -101,9 +109,15 @@ struct ThisForThatRow: View {
                         .font(.caption2)
                         .fontWeight(.bold)
                         .foregroundStyle(.secondary)
-                    Text(pact.thisAction)
-                        .font(.headline)
-                        .lineLimit(2)
+                    if let routine {
+                        Label(pact.thisAction, systemImage: routine.programIcon)
+                            .font(.headline)
+                            .lineLimit(2)
+                    } else {
+                        Text(pact.thisAction)
+                            .font(.headline)
+                            .lineLimit(2)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -127,15 +141,19 @@ struct ThisForThatRow: View {
             ThisForThatProgressView(pact: pact)
 
             HStack(spacing: 8) {
-                if let exercise {
+                if let routine {
+                    NavigationLink(destination: RoutineDetailView(
+                        routine: routine,
+                        allExercises: allExercises,
+                        profile: profile,
+                        routineCompleted: { _ = profile?.completeRoutine() }
+                    )) {
+                        startLabel
+                    }
+                    .buttonStyle(DesignTokens.scaleButton)
+                } else if let exercise {
                     NavigationLink(destination: ExerciseDetailView(exercise: exercise)) {
-                        Label("Start", systemImage: "play.fill")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(Color(uiColor: .secondarySystemGroupedBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        startLabel
                     }
                     .buttonStyle(DesignTokens.scaleButton)
                 }
@@ -182,6 +200,16 @@ struct ThisForThatRow: View {
         .padding(DesignTokens.cardPadding)
         .frame(maxWidth: .infinity)
         .cardStyle()
+    }
+
+    private var startLabel: some View {
+        Label("Start", systemImage: "play.fill")
+            .font(.subheadline)
+            .fontWeight(.semibold)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(Color(uiColor: .secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 
     /// Weekly pacts count each day once, so further taps today do nothing.
@@ -408,12 +436,24 @@ struct ThisForThatEditorView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \Exercise.name) private var allExercises: [Exercise]
+    @Query private var routines: [Routine]
 
     @State private var thisAction = ""
     @State private var thatTreat = ""
     @State private var treatIcon = "gift.fill"
     @State private var isWeekly = true
     @State private var targetCount = 5
+
+    private var linkFooter: String {
+        let name = thisAction.trimmingCharacters(in: .whitespaces)
+        if routines.contains(where: { $0.name == name }) {
+            return "Linked to the \(name) program — tap Start on the card to run it."
+        }
+        if allExercises.contains(where: { $0.name == name }) {
+            return "Linked to the \(name) exercise — tap Start on the card to run it."
+        }
+        return "Type any habit, or choose a program or exercise to get a Start button."
+    }
 
     private var canSave: Bool {
         !thisAction.trimmingCharacters(in: .whitespaces).isEmpty
@@ -425,6 +465,19 @@ struct ThisForThatEditorView: View {
             Form {
                 Section {
                     TextField("e.g. Shoulder stretches", text: $thisAction)
+                    if !routines.isEmpty {
+                        Menu {
+                            ForEach(Routine.sortedForDisplay(routines)) { routine in
+                                Button {
+                                    thisAction = routine.name
+                                } label: {
+                                    Label(routine.name, systemImage: routine.programIcon)
+                                }
+                            }
+                        } label: {
+                            Label("Choose a program", systemImage: "square.stack.fill")
+                        }
+                    }
                     if !allExercises.isEmpty {
                         Menu {
                             ForEach(ExerciseCategory.displayCategories) { category in
@@ -438,11 +491,13 @@ struct ThisForThatEditorView: View {
                                 }
                             }
                         } label: {
-                            Label("Pick from exercise library", systemImage: "list.bullet")
+                            Label("Choose an exercise", systemImage: "figure.flexibility")
                         }
                     }
                 } header: {
                     Text("This — the habit")
+                } footer: {
+                    Text(linkFooter)
                 }
 
                 Section {
@@ -538,7 +593,7 @@ struct ThisForThatEditorView: View {
 
 #Preview("This for That — Section") {
     let container = try! ModelContainer(
-        for: ThisForThat.self, Exercise.self,
+        for: ThisForThat.self, Exercise.self, Routine.self, UserProfile.self,
         configurations: ModelConfiguration(isStoredInMemoryOnly: true)
     )
     let pact = ThisForThat(thisAction: "Shoulder stretches", thatTreat: "Chocolate bar", treatIcon: "birthday.cake.fill", isWeekly: true, targetCount: 5)
@@ -557,7 +612,7 @@ struct ThisForThatEditorView: View {
     NavigationStack {
         ThisForThatSection()
     }
-    .modelContainer(for: [ThisForThat.self, Exercise.self], inMemory: true)
+    .modelContainer(for: [ThisForThat.self, Exercise.self, Routine.self, UserProfile.self], inMemory: true)
 }
 
 #Preview("Treat Earned") {
@@ -566,5 +621,5 @@ struct ThisForThatEditorView: View {
 
 #Preview("Editor") {
     ThisForThatEditorView(pact: nil)
-        .modelContainer(for: [ThisForThat.self, Exercise.self], inMemory: true)
+        .modelContainer(for: [ThisForThat.self, Exercise.self, Routine.self, UserProfile.self], inMemory: true)
 }
