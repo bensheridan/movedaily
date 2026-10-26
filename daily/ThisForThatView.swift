@@ -13,6 +13,9 @@ struct ThisForThatSection: View {
     @State private var showingManager = false
     @State private var showingNewPact = false
     @State private var earnedPact: ThisForThat? = nil
+    @State private var unlockedTier: ExperienceTier? = nil
+    /// A tier unlocked while the treat sheet is up; shown once that sheet is dismissed.
+    @State private var pendingTier: ExperienceTier? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -39,11 +42,7 @@ struct ThisForThatSection: View {
                             routine: routines.first { $0.name == pact.thisAction },
                             allExercises: allExercises,
                             profile: profiles.first,
-                            onDone: {
-                                if pact.markDone() {
-                                    earnedPact = pact
-                                }
-                            }
+                            onDone: { complete(pact) }
                         )
                     }
                 }
@@ -56,9 +55,28 @@ struct ThisForThatSection: View {
         .sheet(isPresented: $showingNewPact) {
             ThisForThatEditorView(pact: nil)
         }
-        .sheet(item: $earnedPact) { pact in
+        .sheet(item: $earnedPact, onDismiss: {
+            unlockedTier = pendingTier
+            pendingTier = nil
+        }) { pact in
             TreatEarnedView(pact: pact)
                 .presentationDetents([.medium])
+        }
+        .sheet(item: $unlockedTier) { tier in
+            LevelUpView(tier: tier)
+        }
+    }
+
+    /// Records the pact and counts it as today's activity, so it earns XP and keeps the
+    /// streak alive (completeRoutine only awards once per day).
+    private func complete(_ pact: ThisForThat) {
+        let earnedTreat = pact.markDone()
+        let tier = profiles.first?.completeRoutine()
+        if earnedTreat {
+            earnedPact = pact
+            pendingTier = tier
+        } else {
+            unlockedTier = tier
         }
     }
 
