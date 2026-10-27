@@ -45,6 +45,7 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var profiles: [UserProfile]
     @State private var showingOnboarding = false
+    @Environment(\.horizontalSizeClass) private var sizeClass
 
     var body: some View {
         Group {
@@ -54,6 +55,7 @@ struct ContentView: View {
                 DashboardView(profile: profiles.first)
             }
         }
+        .environment(\.isUnfolded, sizeClass == .regular)
         .onAppear {
             Exercise.seedInitialData(context: modelContext)
             if profiles.isEmpty {
@@ -81,6 +83,7 @@ struct DashboardView: View {
     @State private var showingCustomBuilder = false
     @State private var showingWeeklyPlanner = false
     @State private var ignorePlanToday = false
+    @Environment(\.isUnfolded) private var isUnfolded
 
     var activePlan: WorkoutPlan? {
         allPlans.first(where: { $0.isActive })
@@ -136,7 +139,7 @@ struct DashboardView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 LiquidGlass()
 
@@ -144,134 +147,38 @@ struct DashboardView: View {
                     VStack(alignment: .leading, spacing: DesignTokens.sectionSpacing) {
                         HeaderView(profile: profile)
 
-                        // Session duration tier picker
-                        SessionTierPicker(
-                            profile: profile,
-                            selectedTierRaw: $preferredSessionTierRaw
-                        )
-                        .padding(.horizontal)
-
-                        // Today's session area: plan day, rest day banner, or auto session
-                        if let planDay = todayPlanDay, !ignorePlanToday {
-                            TodaysPlanCard(
-                                activePlanName: activePlan?.name ?? "",
-                                planDay: planDay,
-                                allExercises: allExercises,
-                                profile: profile,
-                                onIgnore: { ignorePlanToday = true },
-                                routineCompleted: {
-                                    if let p = profile, let tier = p.completeRoutine() {
-                                        unlockedTier = tier
-                                    }
-                                    refreshTrigger.toggle()
+                        if isUnfolded {
+                            // Inner screen: today + programs beside This for That + progress.
+                            HStack(alignment: .top, spacing: 0) {
+                                VStack(alignment: .leading, spacing: DesignTokens.sectionSpacing) {
+                                    sessionSection
+                                    programsSection
                                 }
-                            )
-                        } else if activePlan != nil && todayPlanDay == nil && !ignorePlanToday {
-                            RestDayBanner(planName: activePlan?.name ?? "") {
-                                ignorePlanToday = true
+                                .frame(maxWidth: .infinity, alignment: .topLeading)
+
+                                VStack(alignment: .leading, spacing: DesignTokens.sectionSpacing) {
+                                    ThisForThatSection()
+                                    StatsView(profile: profile)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .topLeading)
                             }
-                        } else if let routine = generatedRoutine {
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text("Today's Workout")
-                                    .font(.title2)
-                                    .fontWeight(.bold)
-                                    .padding(.horizontal)
 
-                                if injuryNoticeVisible {
-                                    HStack(spacing: 8) {
-                                        Image(systemName: "bandage")
-                                            .foregroundStyle(.orange)
-                                        Text("Some exercises were removed due to your active injury.")
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                    }
-                                    .padding(.horizontal)
-                                }
-
-                                NavigationLink(destination: RoutineDetailView(
-                                    routine: routine,
-                                    allExercises: allExercises,
-                                    profile: profile,
-                                    routineCompleted: {
-                                        if let p = profile, let tier = p.completeRoutine() {
-                                            unlockedTier = tier
-                                        }
-                                        rebuildSession()
-                                        refreshTrigger.toggle()
-                                    }
-                                )) {
-                                    DailyRoutineCard(routine: routine)
-                                }
-                                .buttonStyle(DesignTokens.scaleButton)
-                                .padding(.horizontal)
-
-                                Button(action: { showingCustomBuilder = true }) {
-                                    Label("Build your own workout", systemImage: "slider.horizontal.3")
-                                        .font(.subheadline)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 10)
-                                        .background(Color(uiColor: .secondarySystemGroupedBackground))
-                                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                                }
-                                .buttonStyle(DesignTokens.scaleButton)
-                                .padding(.horizontal)
-                            }
-                        } else if !(profile?.activeInjuries ?? []).isEmpty {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Today's Workout")
-                                    .font(.title2)
-                                    .fontWeight(.bold)
-                                    .padding(.horizontal)
-                                HStack(spacing: 8) {
-                                    Image(systemName: "bandage")
-                                        .foregroundStyle(.orange)
-                                    Text("No exercises available for your current injury settings. Try adjusting your injury profile.")
-                                        .font(.subheadline)
-                                        .foregroundStyle(.secondary)
-                                }
-                                .padding(.horizontal)
-                            }
+                            categoriesSection(columns: 4)
+                        } else {
+                            sessionSection
+                            programsSection
+                            ThisForThatSection()
+                            categoriesSection(columns: 2)
+                            StatsView(profile: profile)
                         }
-
-                        ProgramsSection(
-                            allExercises: allExercises,
-                            profile: profile,
-                            routineCompleted: {
-                                if let p = profile, let tier = p.completeRoutine() {
-                                    unlockedTier = tier
-                                }
-                                refreshTrigger.toggle()
-                            }
-                        )
-
-                        ThisForThatSection()
-
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Exercise Categories")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .padding(.horizontal)
-
-                            LazyVGrid(
-                                columns: [GridItem(.flexible()), GridItem(.flexible())],
-                                spacing: DesignTokens.gridSpacing
-                            ) {
-                                ForEach(categories) { category in
-                                    NavigationLink(destination: ExerciseListView(category: category, profile: profile)) {
-                                        CategoryCard(category: category)
-                                    }
-                                    .buttonStyle(DesignTokens.scaleButton)
-                                }
-                            }
-                            .padding(.horizontal)
-                        }
-
-                        StatsView(profile: profile)
                     }
                     .padding(.vertical)
                 }
             }
             .navigationTitle("Daily")
+            #if DEBUG
+            .modifier(ScreenshotRouteModifier(allExercises: allExercises, profile: profile))
+            #endif
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     Button(action: { showingWeeklyPlanner = true }) {
@@ -303,6 +210,136 @@ struct DashboardView: View {
             .sheet(isPresented: $showingWeeklyPlanner) {
                 WeeklyPlannerView()
             }
+        }
+    }
+
+    // MARK: Sections
+
+    /// Session duration picker and today's workout (plan day, rest day or auto session).
+    @ViewBuilder
+    private var sessionSection: some View {
+        // Session duration tier picker
+        SessionTierPicker(
+            profile: profile,
+            selectedTierRaw: $preferredSessionTierRaw
+        )
+        .padding(.horizontal)
+
+        // Today's session area: plan day, rest day banner, or auto session
+        if let planDay = todayPlanDay, !ignorePlanToday {
+            TodaysPlanCard(
+                activePlanName: activePlan?.name ?? "",
+                planDay: planDay,
+                allExercises: allExercises,
+                profile: profile,
+                onIgnore: { ignorePlanToday = true },
+                routineCompleted: {
+                    if let p = profile, let tier = p.completeRoutine() {
+                        unlockedTier = tier
+                    }
+                    refreshTrigger.toggle()
+                }
+            )
+        } else if activePlan != nil && todayPlanDay == nil && !ignorePlanToday {
+            RestDayBanner(planName: activePlan?.name ?? "") {
+                ignorePlanToday = true
+            }
+        } else if let routine = generatedRoutine {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Today's Workout")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .padding(.horizontal)
+
+                if injuryNoticeVisible {
+                    HStack(spacing: 8) {
+                        Image(systemName: "bandage")
+                            .foregroundStyle(.orange)
+                        Text("Some exercises were removed due to your active injury.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.horizontal)
+                }
+
+                NavigationLink(destination: RoutineDetailView(
+                    routine: routine,
+                    allExercises: allExercises,
+                    profile: profile,
+                    routineCompleted: {
+                        if let p = profile, let tier = p.completeRoutine() {
+                            unlockedTier = tier
+                        }
+                        rebuildSession()
+                        refreshTrigger.toggle()
+                    }
+                )) {
+                    DailyRoutineCard(routine: routine)
+                }
+                .buttonStyle(DesignTokens.scaleButton)
+                .padding(.horizontal)
+
+                Button(action: { showingCustomBuilder = true }) {
+                    Label("Build your own workout", systemImage: "slider.horizontal.3")
+                        .font(.subheadline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(Color(uiColor: .secondarySystemGroupedBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                }
+                .buttonStyle(DesignTokens.scaleButton)
+                .padding(.horizontal)
+            }
+        } else if !(profile?.activeInjuries ?? []).isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Today's Workout")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .padding(.horizontal)
+                HStack(spacing: 8) {
+                    Image(systemName: "bandage")
+                        .foregroundStyle(.orange)
+                    Text("No exercises available for your current injury settings. Try adjusting your injury profile.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal)
+            }
+        }
+    }
+
+    private var programsSection: some View {
+        ProgramsSection(
+            allExercises: allExercises,
+            profile: profile,
+            routineCompleted: {
+                if let p = profile, let tier = p.completeRoutine() {
+                    unlockedTier = tier
+                }
+                refreshTrigger.toggle()
+            }
+        )
+    }
+
+    private func categoriesSection(columns: Int) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Exercise Categories")
+                .font(.title2)
+                .fontWeight(.bold)
+                .padding(.horizontal)
+
+            LazyVGrid(
+                columns: Array(repeating: GridItem(.flexible()), count: columns),
+                spacing: DesignTokens.gridSpacing
+            ) {
+                ForEach(categories) { category in
+                    NavigationLink(destination: ExerciseListView(category: category, profile: profile)) {
+                        CategoryCard(category: category)
+                    }
+                    .buttonStyle(DesignTokens.scaleButton)
+                }
+            }
+            .padding(.horizontal)
         }
     }
 }

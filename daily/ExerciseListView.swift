@@ -162,6 +162,7 @@ struct ExerciseDetailView: View {
     @State private var timerCompleted = false
     @State private var showingTips = false
     @State private var audioEnabled = true
+    @Environment(\.isUnfolded) private var isUnfolded
 
     init(exercise: Exercise) {
         self.exercise = exercise
@@ -172,117 +173,32 @@ struct ExerciseDetailView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: DesignTokens.sectionSpacing) {
-                // Header
-                HStack {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(exercise.name)
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                        DifficultyBadge(difficulty: exercise.difficulty)
-                    }
-                    Spacer()
-                    Button(action: { audioEnabled.toggle() }) {
-                        Image(systemName: audioEnabled ? "speaker.wave.2.fill" : "speaker.slash.fill")
-                            .font(.title2)
-                            .foregroundStyle(audioEnabled ? .blue : .secondary)
-                    }
-                    .buttonStyle(DesignTokens.scaleButton)
-                }
-
-                // Timer
-                TimerCircle(
-                    timeRemaining: timeRemaining,
-                    totalTime: exercise.durationSeconds,
-                    timerCompleted: timerCompleted
-                )
-                .frame(maxWidth: .infinity)
-                .padding(.vertical)
-
-                // Controls
-                HStack(spacing: 12) {
-                    Button(action: {
-                        let isFreshStart = !timerActive && !timerCompleted && timeRemaining == exercise.durationSeconds
-                        timerActive.toggle()
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                        if isFreshStart && timerActive && audioEnabled {
-                            TTSManager.shared.speak(exercise.name)
-                            if let openingCue = exercise.audioCues[0] {
-                                TTSManager.shared.queue(openingCue)
-                            }
+            if isUnfolded {
+                // Inner screen: timer and controls beside the instructions.
+                VStack(alignment: .leading, spacing: DesignTokens.sectionSpacing) {
+                    header
+                    HStack(alignment: .top, spacing: DesignTokens.sectionSpacing) {
+                        VStack(spacing: DesignTokens.sectionSpacing) {
+                            timerSection
                         }
-                    }) {
-                        Label(timerActive ? "Pause" : "Start", systemImage: timerActive ? "pause.fill" : "play.fill")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(timerCompleted ? .green : .blue)
+                        .frame(width: 300)
 
-                    Button(action: {
-                        timeRemaining = exercise.durationSeconds
-                        timerActive = false
-                        timerCompleted = false
-                        UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
-                        TTSManager.shared.stop()
-                    }) {
-                        Image(systemName: "arrow.clockwise")
-                    }
-                    .buttonStyle(.bordered)
-                    .tint(.secondary)
-                }
-
-                // Completion banner
-                if timerCompleted {
-                    HStack(spacing: 10) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
-                        Text("Exercise complete — great work!")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                    }
-                    .padding(DesignTokens.cardPadding)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.green.opacity(0.12))
-                    .clipShape(RoundedRectangle(cornerRadius: DesignTokens.cardCornerRadius, style: .continuous))
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                }
-
-                // Instructions
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Instructions")
-                        .font(.title2)
-                        .fontWeight(.bold)
-
-                    ForEach(0..<exercise.instructions.count, id: \.self) { index in
-                        HStack(alignment: .top, spacing: 10) {
-                            Text("\(index + 1).")
-                                .fontWeight(.bold)
-                                .foregroundStyle(.blue)
-                            Text(exercise.instructions[index])
+                        VStack(alignment: .leading, spacing: DesignTokens.sectionSpacing) {
+                            instructionsCard
+                            tipsCard
                         }
                     }
                 }
                 .padding(DesignTokens.cardPadding)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .cardStyle()
-
-                // Tips
-                if !exercise.tips.isEmpty {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("Safety & Form")
-                            .font(.headline)
-                        ForEach(exercise.tips, id: \.self) { tip in
-                            Label(tip, systemImage: "checkmark.shield.fill")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .padding(DesignTokens.cardPadding)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .cardStyle()
+            } else {
+                VStack(alignment: .leading, spacing: DesignTokens.sectionSpacing) {
+                    header
+                    timerSection
+                    instructionsCard
+                    tipsCard
                 }
+                .padding(DesignTokens.cardPadding)
             }
-            .padding(DesignTokens.cardPadding)
         }
         .onReceive(timer) { _ in
             if timerActive && timeRemaining > 0 {
@@ -314,6 +230,123 @@ struct ExerciseDetailView: View {
             TipsView(exerciseName: exercise.name, tips: exercise.tips)
         }
         .animation(.easeInOut(duration: 0.3), value: timerCompleted)
+    }
+
+    // MARK: Sections
+
+    private var header: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(exercise.name)
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                DifficultyBadge(difficulty: exercise.difficulty)
+            }
+            Spacer()
+            Button(action: { audioEnabled.toggle() }) {
+                Image(systemName: audioEnabled ? "speaker.wave.2.fill" : "speaker.slash.fill")
+                    .font(.title2)
+                    .foregroundStyle(audioEnabled ? .blue : .secondary)
+            }
+            .buttonStyle(DesignTokens.scaleButton)
+        }
+    }
+
+    @ViewBuilder
+    private var timerSection: some View {
+        TimerCircle(
+            timeRemaining: timeRemaining,
+            totalTime: exercise.durationSeconds,
+            timerCompleted: timerCompleted
+        )
+        .frame(maxWidth: .infinity)
+        .padding(.vertical)
+
+        // Controls
+        HStack(spacing: 12) {
+            Button(action: {
+                let isFreshStart = !timerActive && !timerCompleted && timeRemaining == exercise.durationSeconds
+                timerActive.toggle()
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                if isFreshStart && timerActive && audioEnabled {
+                    TTSManager.shared.speak(exercise.name)
+                    if let openingCue = exercise.audioCues[0] {
+                        TTSManager.shared.queue(openingCue)
+                    }
+                }
+            }) {
+                Label(timerActive ? "Pause" : "Start", systemImage: timerActive ? "pause.fill" : "play.fill")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(timerCompleted ? .green : .blue)
+
+            Button(action: {
+                timeRemaining = exercise.durationSeconds
+                timerActive = false
+                timerCompleted = false
+                UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
+                TTSManager.shared.stop()
+            }) {
+                Image(systemName: "arrow.clockwise")
+            }
+            .buttonStyle(.bordered)
+            .tint(.secondary)
+        }
+
+        // Completion banner
+        if timerCompleted {
+            HStack(spacing: 10) {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+                Text("Exercise complete — great work!")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+            }
+            .padding(DesignTokens.cardPadding)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.green.opacity(0.12))
+            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.cardCornerRadius, style: .continuous))
+            .transition(.move(edge: .top).combined(with: .opacity))
+        }
+    }
+
+    private var instructionsCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Instructions")
+                .font(.title2)
+                .fontWeight(.bold)
+
+            ForEach(0..<exercise.instructions.count, id: \.self) { index in
+                HStack(alignment: .top, spacing: 10) {
+                    Text("\(index + 1).")
+                        .fontWeight(.bold)
+                        .foregroundStyle(.blue)
+                    Text(exercise.instructions[index])
+                }
+            }
+        }
+        .padding(DesignTokens.cardPadding)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .cardStyle()
+    }
+
+    @ViewBuilder
+    private var tipsCard: some View {
+        if !exercise.tips.isEmpty {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Safety & Form")
+                    .font(.headline)
+                ForEach(exercise.tips, id: \.self) { tip in
+                    Label(tip, systemImage: "checkmark.shield.fill")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .padding(DesignTokens.cardPadding)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .cardStyle()
+        }
     }
 
     private func checkAudioCues() {
