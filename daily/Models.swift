@@ -486,11 +486,37 @@ extension Exercise {
             context.insert(exercise)
         }
 
+        // 2b. Refresh focus-area exercise descriptions, which no longer name a condition
+        let focusDescriptions = Dictionary(
+            (frozenShoulderExercises() + refluxBreathingExercises()).map { ($0.name, $0.exerciseDescription) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        for exercise in exercises {
+            if let description = focusDescriptions[exercise.name] { exercise.exerciseDescription = description }
+        }
+
         // 3. Apply contraindications to all exercises (idempotent — safe to re-run)
         let allExercises = exercises + newExercises.filter { !existingNames.contains($0.name) }
         applyContraindications(to: allExercises)
 
-        // 4. Insert new routines that don't already exist (checked by name)
+        // 4. Rename programs whose names were softened; pacts link to programs by name
+        if let existingRoutines = try? context.fetch(FetchDescriptor<Routine>()) {
+            let seeded = routines()
+            for routine in existingRoutines {
+                guard let newName = Routine.renamedPrograms[routine.name] else { continue }
+                routine.name = newName
+                if let description = seeded.first(where: { $0.name == newName })?.routineDescription {
+                    routine.routineDescription = description
+                }
+            }
+        }
+        if let pacts = try? context.fetch(FetchDescriptor<ThisForThat>()) {
+            for pact in pacts {
+                if let newName = Routine.renamedPrograms[pact.thisAction] { pact.thisAction = newName }
+            }
+        }
+
+        // 5. Insert new routines that don't already exist (checked by name)
         if let existingRoutines = try? context.fetch(FetchDescriptor<Routine>()) {
             let existingRoutineNames = Set(existingRoutines.map { $0.name })
             for routine in routines() where !existingRoutineNames.contains(routine.name) {
@@ -678,7 +704,7 @@ extension Exercise {
         [
             Exercise(
                 name: "Pendulum Swing",
-                exerciseDescription: "Frozen shoulder: gentle, gravity-assisted loosening.",
+                exerciseDescription: "Gentle, gravity-assisted loosening.",
                 durationSeconds: 90,
                 category: .stretching,
                 instructions: [
@@ -705,7 +731,7 @@ extension Exercise {
             ),
             Exercise(
                 name: "Finger Wall Walk",
-                exerciseDescription: "Frozen shoulder: rebuild overhead reach.",
+                exerciseDescription: "Rebuild overhead reach.",
                 durationSeconds: 90,
                 category: .stretching,
                 instructions: [
@@ -735,7 +761,7 @@ extension Exercise {
             ),
             Exercise(
                 name: "Cross-Body Arm Stretch",
-                exerciseDescription: "Frozen shoulder: ease tightness at the back of the shoulder.",
+                exerciseDescription: "Ease tightness at the back of the shoulder.",
                 durationSeconds: 60,
                 category: .stretching,
                 instructions: [
@@ -761,7 +787,7 @@ extension Exercise {
             ),
             Exercise(
                 name: "Towel Stretch",
-                exerciseDescription: "Frozen shoulder: improve reach behind your back.",
+                exerciseDescription: "Improve reach behind your back.",
                 durationSeconds: 90,
                 category: .stretching,
                 instructions: [
@@ -790,7 +816,7 @@ extension Exercise {
             ),
             Exercise(
                 name: "Outward Rotation Stretch",
-                exerciseDescription: "Frozen shoulder: restore outward turning of the arm.",
+                exerciseDescription: "Restore outward turning of the arm.",
                 durationSeconds: 60,
                 category: .stretching,
                 instructions: [
@@ -816,7 +842,7 @@ extension Exercise {
             ),
             Exercise(
                 name: "Armpit Stretch",
-                exerciseDescription: "Frozen shoulder: open the armpit and lift the arm.",
+                exerciseDescription: "Open the armpit and lift the arm.",
                 durationSeconds: 60,
                 category: .stretching,
                 instructions: [
@@ -850,7 +876,7 @@ extension Exercise {
         [
             Exercise(
                 name: "Diaphragm Breathing (Lying)",
-                exerciseDescription: "Reflux: learn to breathe with your diaphragm.",
+                exerciseDescription: "Learn to breathe with your diaphragm.",
                 durationSeconds: 300,
                 category: .breathing,
                 instructions: [
@@ -883,7 +909,7 @@ extension Exercise {
             ),
             Exercise(
                 name: "Seated Diaphragm Breathing",
-                exerciseDescription: "Reflux: upright belly breathing — fine after meals.",
+                exerciseDescription: "Upright belly breathing — fine after meals.",
                 durationSeconds: 300,
                 category: .breathing,
                 instructions: [
@@ -913,7 +939,7 @@ extension Exercise {
             ),
             Exercise(
                 name: "360° Rib Breathing",
-                exerciseDescription: "Reflux: expand the lower ribs to work the whole diaphragm.",
+                exerciseDescription: "Expand the lower ribs to work the whole diaphragm.",
                 durationSeconds: 180,
                 category: .breathing,
                 instructions: [
@@ -943,7 +969,7 @@ extension Exercise {
             ),
             Exercise(
                 name: "Weighted Belly Breathing",
-                exerciseDescription: "Reflux: strengthen the diaphragm against light resistance.",
+                exerciseDescription: "Strengthen the diaphragm against light resistance.",
                 durationSeconds: 300,
                 category: .breathing,
                 instructions: [
@@ -1350,10 +1376,10 @@ extension Exercise {
             Routine(name: "Upper Body Strength", routineDescription: "12 min arms, chest, and back.", exerciseNames: ["Push-ups", "Diamond Push-ups", "Triceps Dips", "Plank Shoulder Taps", "Superman Hold", "Arm Circles"]),
             Routine(name: "Gentle Morning", routineDescription: "10 min low-impact wake-up.", exerciseNames: ["Shoulder Rolls", "Neck Tilts", "Cat-Cow", "Side Reach Stretch", "Hamstring Stretch", "Belly Breathing"]),
 
-            // Targeted relief (008)
-            Routine(name: "Frozen Shoulder Relief", routineDescription: "Gentle stretches to free up a locked shoulder.", exerciseNames: ["Pendulum Swing", "Finger Wall Walk", "Cross-Body Arm Stretch", "Towel Stretch", "Outward Rotation Stretch", "Armpit Stretch"]),
-            Routine(name: "Reflux Breathing", routineDescription: "Strengthen your diaphragm to help with reflux.", exerciseNames: ["Seated Diaphragm Breathing", "360° Rib Breathing", "Diaphragm Breathing (Lying)", "Weighted Belly Breathing"]),
-            Routine(name: "Lower Back Relief", routineDescription: "Ease a stiff or sore lower back.", exerciseNames: ["Cat-Cow", "Seated Spinal Twist", "Bird Dog", "Child's Pose", "Figure-4 Stretch", "Belly Breathing"])
+            // Focus areas (008)
+            Routine(name: "Shoulder Mobility", routineDescription: "Gentle stretches for a stiff shoulder.", exerciseNames: ["Pendulum Swing", "Finger Wall Walk", "Cross-Body Arm Stretch", "Towel Stretch", "Outward Rotation Stretch", "Armpit Stretch"]),
+            Routine(name: "Diaphragm Training", routineDescription: "Slow, steady breathing to strengthen your diaphragm.", exerciseNames: ["Seated Diaphragm Breathing", "360° Rib Breathing", "Diaphragm Breathing (Lying)", "Weighted Belly Breathing"]),
+            Routine(name: "Lower Back Mobility", routineDescription: "Gentle movement for a stiff lower back.", exerciseNames: ["Cat-Cow", "Seated Spinal Twist", "Bird Dog", "Child's Pose", "Figure-4 Stretch", "Belly Breathing"])
         ]
     }
 }

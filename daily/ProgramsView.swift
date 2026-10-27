@@ -4,12 +4,12 @@ import SwiftData
 // MARK: - Program Presentation
 
 /// Display metadata for seeded routines, shown to the user as "Programs".
-/// Targeted-relief programs are listed first; unknown routines fall back to a generic style.
+/// Focus-area programs are listed first; unknown routines fall back to a generic style.
 extension Routine {
     private static let styles: [String: (icon: String, color: Color)] = [
-        "Frozen Shoulder Relief": ("figure.arms.open", .orange),
-        "Reflux Breathing":       ("lungs.fill", .teal),
-        "Lower Back Relief":      ("figure.flexibility", .indigo),
+        "Shoulder Mobility":      ("figure.arms.open", .orange),
+        "Diaphragm Training":     ("lungs.fill", .teal),
+        "Lower Back Mobility":    ("figure.flexibility", .indigo),
         "Morning Wake-Up":        ("sunrise.fill", .yellow),
         "Gentle Morning":         ("sun.horizon.fill", .yellow),
         "Desk Break":             ("desktopcomputer", .blue),
@@ -24,11 +24,18 @@ extension Routine {
         "Power Circuit":          ("bolt.heart.fill", .pink),
     ]
 
-    static let reliefProgramNames = ["Frozen Shoulder Relief", "Reflux Breathing", "Lower Back Relief"]
+    static let focusProgramNames = ["Shoulder Mobility", "Diaphragm Training", "Lower Back Mobility"]
+
+    /// Earlier names of the focus-area programs, renamed on existing installs by `Exercise.seedInitialData`.
+    static let renamedPrograms = [
+        "Frozen Shoulder Relief": "Shoulder Mobility",
+        "Reflux Breathing": "Diaphragm Training",
+        "Lower Back Relief": "Lower Back Mobility",
+    ]
 
     var programIcon: String { Self.styles[name]?.icon ?? "list.bullet.rectangle" }
     var programColor: Color { Self.styles[name]?.color ?? .blue }
-    var isReliefProgram: Bool { Self.reliefProgramNames.contains(name) }
+    var isFocusProgram: Bool { Self.focusProgramNames.contains(name) }
 
     /// The exercises this routine will actually run for the given profile (matches RoutineDetailView).
     func programExercises(from allExercises: [Exercise], profile: UserProfile?) -> [Exercise] {
@@ -37,11 +44,11 @@ extension Routine {
         }
     }
 
-    /// Relief programs first (in their defined order), then the rest alphabetically.
+    /// Focus-area programs first (in their defined order), then the rest alphabetically.
     static func sortedForDisplay(_ routines: [Routine]) -> [Routine] {
         routines.sorted { a, b in
-            let ia = reliefProgramNames.firstIndex(of: a.name) ?? Int.max
-            let ib = reliefProgramNames.firstIndex(of: b.name) ?? Int.max
+            let ia = focusProgramNames.firstIndex(of: a.name) ?? Int.max
+            let ib = focusProgramNames.firstIndex(of: b.name) ?? Int.max
             return ia != ib ? ia < ib : a.name < b.name
         }
     }
@@ -118,8 +125,8 @@ struct ProgramCard: View {
                     .background(routine.programColor.gradient)
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 Spacer()
-                if routine.isReliefProgram {
-                    Text("Relief")
+                if routine.isFocusProgram {
+                    Text("Focus")
                         .font(.caption2)
                         .fontWeight(.bold)
                         .foregroundStyle(routine.programColor)
@@ -209,8 +216,8 @@ struct ProgramsListView: View {
 
     @ViewBuilder
     private var sections: some View {
-        section("Targeted relief", routines: sorted.filter(\.isReliefProgram))
-        section("Workouts & routines", routines: sorted.filter { !$0.isReliefProgram })
+        section("Focus areas", routines: sorted.filter(\.isFocusProgram))
+        section("Workouts & routines", routines: sorted.filter { !$0.isFocusProgram })
     }
 
     private func detail(for routine: Routine) -> RoutineDetailView {
@@ -287,7 +294,7 @@ struct ProgramRow: View {
 #Preview("Program Row") {
     List {
         ProgramRow(
-            routine: Routine(name: "Frozen Shoulder Relief", routineDescription: "Gentle mobility for a stiff shoulder", exerciseNames: []),
+            routine: Routine(name: "Shoulder Mobility", routineDescription: "Gentle stretches for a stiff shoulder", exerciseNames: []),
             allExercises: [],
             profile: nil
         )

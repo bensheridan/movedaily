@@ -64,8 +64,14 @@ struct OnboardingView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .padding(.top, 4)
+
+                Text(HealthDisclaimer.short)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 8)
             }
-            .padding(.bottom, 48)
+            .padding(.bottom, 32)
         }
         .padding(.horizontal, DesignTokens.cardPadding)
     }
