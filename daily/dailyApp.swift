@@ -18,6 +18,7 @@ struct MoveDailyApp: App {
             CustomExercise.self,
             WorkoutPlan.self,
             PlanDay.self,
+            ThisForThat.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 

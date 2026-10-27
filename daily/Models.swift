@@ -448,6 +448,8 @@ extension Exercise {
                 + breathingExercises()
                 + bodyweightExercises()
                 + balanceExercises()
+                + frozenShoulderExercises()
+                + refluxBreathingExercises()
             applyContraindications(to: allExercises)
             for exercise in allExercises {
                 context.insert(exercise)
@@ -478,6 +480,8 @@ extension Exercise {
             + newBreathingExercises()
             + newBodyweightExercises()
             + balanceExercises()
+            + frozenShoulderExercises()
+            + refluxBreathingExercises()
         for exercise in newExercises where !existingNames.contains(exercise.name) {
             context.insert(exercise)
         }
@@ -662,6 +666,310 @@ extension Exercise {
                     30: "Switch — cross your left knee. Twist left.",
                     50: "Almost there."
                 ]
+            )
+        ]
+    }
+
+    // MARK: - Targeted Relief
+
+    /// Gentle mobility stretches for a frozen ("locked") shoulder. Deliberately carry no
+    /// shoulder contraindication so they stay available to users with a shoulder injury.
+    private static func frozenShoulderExercises() -> [Exercise] {
+        [
+            Exercise(
+                name: "Pendulum Swing",
+                exerciseDescription: "Frozen shoulder: gentle, gravity-assisted loosening.",
+                durationSeconds: 90,
+                category: .stretching,
+                instructions: [
+                    "Stand beside a table and rest your good hand on it.",
+                    "Lean forward slightly and let the stiff arm hang straight down.",
+                    "Relax the shoulder completely.",
+                    "Swing the arm in small circles, about 30 cm across.",
+                    "Reverse direction halfway through.",
+                    "Switch arms if both shoulders are stiff."
+                ],
+                tips: [
+                    "Let your body sway to move the arm — don't use the shoulder muscles.",
+                    "Do this first; it warms the joint for the other stretches.",
+                    "A warm shower beforehand can help loosen the shoulder."
+                ],
+                audioCues: [
+                    0: "Lean on the table. Let your arm hang loose.",
+                    10: "Small circles. Let the arm swing like a pendulum.",
+                    30: "Keep the shoulder relaxed.",
+                    45: "Reverse the direction.",
+                    70: "Make the circles a little bigger if it feels okay.",
+                    85: "Almost there."
+                ]
+            ),
+            Exercise(
+                name: "Finger Wall Walk",
+                exerciseDescription: "Frozen shoulder: rebuild overhead reach.",
+                durationSeconds: 90,
+                category: .stretching,
+                instructions: [
+                    "Face a wall about an arm's length away.",
+                    "Place the fingertips of the stiff arm on the wall at waist height.",
+                    "Slowly walk your fingers up the wall like a spider.",
+                    "Stop at the first point of tension and hold for a few seconds.",
+                    "Walk the fingers back down slowly.",
+                    "Repeat, aiming a little higher each time."
+                ],
+                tips: [
+                    "Your fingers do the work — keep the shoulder relaxed.",
+                    "Mark your highest point to track progress over the weeks.",
+                    "Don't shrug — keep the shoulder down away from your ear."
+                ],
+                audioCues: [
+                    0: "Fingertips on the wall at waist height.",
+                    5: "Walk your fingers up slowly.",
+                    20: "Hold where you feel tension.",
+                    30: "Walk back down.",
+                    40: "Again — walk your fingers up.",
+                    55: "Hold. Breathe.",
+                    65: "And back down.",
+                    75: "One more — try a little higher.",
+                    85: "Almost there."
+                ]
+            ),
+            Exercise(
+                name: "Cross-Body Arm Stretch",
+                exerciseDescription: "Frozen shoulder: ease tightness at the back of the shoulder.",
+                durationSeconds: 60,
+                category: .stretching,
+                instructions: [
+                    "Sit or stand tall.",
+                    "Use your good arm to lift the stiff arm at the elbow.",
+                    "Gently bring it across your chest.",
+                    "Hold for 15–20 seconds, then relax.",
+                    "Repeat."
+                ],
+                tips: [
+                    "Pull from the elbow, not the wrist.",
+                    "Keep your shoulders level and facing forward.",
+                    "Mild stretch only — stop if you feel sharp pain."
+                ],
+                audioCues: [
+                    0: "Hold the stiff arm at the elbow.",
+                    5: "Bring it gently across your chest.",
+                    20: "Relax the arm down.",
+                    30: "Again — across the chest and hold.",
+                    45: "Relax.",
+                    50: "Almost there."
+                ]
+            ),
+            Exercise(
+                name: "Towel Stretch",
+                exerciseDescription: "Frozen shoulder: improve reach behind your back.",
+                durationSeconds: 90,
+                category: .stretching,
+                instructions: [
+                    "Hold a towel behind your back with both hands, one high and one low.",
+                    "The stiff arm holds the bottom end.",
+                    "Use the top hand to gently pull the towel upward.",
+                    "Hold for a few seconds, then lower.",
+                    "Repeat slowly."
+                ],
+                tips: [
+                    "Pull gently — the lower arm should feel a stretch, not pain.",
+                    "Stand tall and avoid leaning forward.",
+                    "A longer towel makes this easier when starting out."
+                ],
+                audioCues: [
+                    0: "Towel behind your back, stiff arm at the bottom.",
+                    5: "Gently pull the towel upward.",
+                    15: "Hold. Breathe.",
+                    20: "Lower slowly.",
+                    30: "Pull up again.",
+                    45: "Lower.",
+                    55: "Once more — gently up.",
+                    70: "And down.",
+                    85: "Almost there."
+                ]
+            ),
+            Exercise(
+                name: "Outward Rotation Stretch",
+                exerciseDescription: "Frozen shoulder: restore outward turning of the arm.",
+                durationSeconds: 60,
+                category: .stretching,
+                instructions: [
+                    "Stand in a doorway with the stiff arm's elbow bent to 90°.",
+                    "Keep the elbow tucked against your side.",
+                    "Place the palm against the door frame.",
+                    "Slowly turn your body away from the arm.",
+                    "Hold for 15–30 seconds, then relax."
+                ],
+                tips: [
+                    "Keep the elbow pinned to your side throughout.",
+                    "A rolled towel between elbow and ribs can help.",
+                    "Turn your body, not your arm."
+                ],
+                audioCues: [
+                    0: "Elbow bent and tucked in. Palm on the frame.",
+                    5: "Slowly turn your body away.",
+                    20: "Hold. Keep that elbow tucked.",
+                    30: "Relax and reset.",
+                    35: "Turn away again.",
+                    50: "Almost there."
+                ]
+            ),
+            Exercise(
+                name: "Armpit Stretch",
+                exerciseDescription: "Frozen shoulder: open the armpit and lift the arm.",
+                durationSeconds: 60,
+                category: .stretching,
+                instructions: [
+                    "Stand facing a shelf or counter at chest height.",
+                    "Use your good arm to lift the stiff arm onto the shelf.",
+                    "Slowly bend your knees to open up the armpit.",
+                    "Deepen the knee bend a little, then straighten.",
+                    "Repeat gently."
+                ],
+                tips: [
+                    "Let your legs do the movement, not your shoulder.",
+                    "Go only as low as feels comfortable.",
+                    "Keep your back straight."
+                ],
+                audioCues: [
+                    0: "Rest the stiff arm on the shelf.",
+                    5: "Bend your knees slowly — feel the armpit open.",
+                    15: "Straighten up.",
+                    20: "Bend again, a little deeper.",
+                    35: "Straighten.",
+                    40: "Once more — gently down.",
+                    50: "Almost there."
+                ]
+            )
+        ]
+    }
+
+    /// Diaphragm-strengthening breathing for reflux. Training the diaphragm supports the
+    /// valve between the stomach and oesophagus.
+    private static func refluxBreathingExercises() -> [Exercise] {
+        [
+            Exercise(
+                name: "Diaphragm Breathing (Lying)",
+                exerciseDescription: "Reflux: learn to breathe with your diaphragm.",
+                durationSeconds: 300,
+                category: .breathing,
+                instructions: [
+                    "Lie on your back with knees bent, head on a pillow.",
+                    "Place one hand on your chest and one just below your ribs.",
+                    "Breathe in slowly through your nose so your belly rises.",
+                    "The hand on your chest should stay still.",
+                    "Tighten your stomach muscles and exhale through pursed lips.",
+                    "Repeat with slow, steady breaths."
+                ],
+                tips: [
+                    "Wait at least 2–3 hours after eating before lying down for this.",
+                    "Aim for 5–10 minutes, 3–4 times a day as you build the habit.",
+                    "If your chest hand moves, slow the breath down."
+                ],
+                audioCues: [
+                    0: "Lie back, knees bent. One hand on chest, one on belly.",
+                    10: "Breathe in through your nose — belly rises.",
+                    15: "Exhale through pursed lips — belly falls.",
+                    30: "Keep the chest hand still.",
+                    60: "Inhale into the belly.",
+                    65: "Long, slow exhale.",
+                    120: "Stay with the rhythm.",
+                    150: "Halfway there.",
+                    180: "Inhale — fill the belly.",
+                    185: "Exhale — tighten the stomach gently.",
+                    240: "Slow and steady.",
+                    290: "Last few seconds."
+                ]
+            ),
+            Exercise(
+                name: "Seated Diaphragm Breathing",
+                exerciseDescription: "Reflux: upright belly breathing — fine after meals.",
+                durationSeconds: 300,
+                category: .breathing,
+                instructions: [
+                    "Sit upright in a chair, feet flat, shoulders relaxed.",
+                    "Place one hand on your upper belly, just below your ribs.",
+                    "Inhale through your nose for 4 counts — feel the hand move out.",
+                    "Exhale through pursed lips for 6 counts — feel it draw in.",
+                    "Keep your chest and shoulders still."
+                ],
+                tips: [
+                    "Upright breathing is a good choice after meals when lying down can trigger reflux.",
+                    "Try it straight after eating to help calm burping and reflux.",
+                    "Loosen any tight belt or waistband first."
+                ],
+                audioCues: [
+                    0: "Sit tall. Hand just below your ribs.",
+                    5: "Inhale through your nose — four counts.",
+                    9: "Exhale through pursed lips — six counts.",
+                    30: "Keep your shoulders still.",
+                    60: "Inhale — belly out.",
+                    64: "Exhale — belly in.",
+                    120: "Steady rhythm.",
+                    150: "Halfway there.",
+                    210: "Inhale four, exhale six.",
+                    290: "Last few seconds."
+                ]
+            ),
+            Exercise(
+                name: "360° Rib Breathing",
+                exerciseDescription: "Reflux: expand the lower ribs to work the whole diaphragm.",
+                durationSeconds: 180,
+                category: .breathing,
+                instructions: [
+                    "Sit or stand tall.",
+                    "Place your hands on the sides of your lower ribs.",
+                    "Inhale through your nose and push your ribs out into your hands — sideways and back.",
+                    "Exhale slowly and feel the ribs draw in.",
+                    "Repeat."
+                ],
+                tips: [
+                    "Think of the breath expanding like an umbrella opening.",
+                    "Keep the shoulders down and relaxed.",
+                    "Great as a progression once belly breathing feels easy."
+                ],
+                audioCues: [
+                    0: "Hands on your lower ribs.",
+                    5: "Inhale — push the ribs out into your hands.",
+                    10: "Exhale — let them draw in.",
+                    30: "Expand sideways and into your back.",
+                    60: "Inhale wide.",
+                    65: "Slow exhale.",
+                    90: "Halfway there.",
+                    120: "Keep the shoulders down.",
+                    170: "Last few seconds."
+                ],
+                difficulty: .intermediate
+            ),
+            Exercise(
+                name: "Weighted Belly Breathing",
+                exerciseDescription: "Reflux: strengthen the diaphragm against light resistance.",
+                durationSeconds: 300,
+                category: .breathing,
+                instructions: [
+                    "Lie on your back with knees bent.",
+                    "Rest a light book on your upper belly, just below your ribs.",
+                    "Inhale through your nose and lift the book with your belly.",
+                    "Exhale slowly and let the book lower.",
+                    "Keep your chest still throughout."
+                ],
+                tips: [
+                    "Start with a light paperback — only add weight once it feels easy.",
+                    "Do this on an empty stomach, at least 2–3 hours after eating.",
+                    "Stop if you feel discomfort or heartburn."
+                ],
+                audioCues: [
+                    0: "Lie back. Rest the book on your upper belly.",
+                    10: "Inhale — lift the book with your belly.",
+                    15: "Exhale — let it lower slowly.",
+                    30: "Keep your chest still.",
+                    60: "Breathe in — push the book up.",
+                    65: "Slow exhale.",
+                    150: "Halfway there.",
+                    210: "Steady breaths.",
+                    290: "Last few seconds."
+                ],
+                difficulty: .intermediate
             )
         ]
     }
@@ -1040,7 +1348,114 @@ extension Exercise {
             Routine(name: "Power Circuit", routineDescription: "20 min high-intensity circuit.", exerciseNames: ["Jump Squats", "Burpees", "Mountain Climbers", "Push-ups", "Bicycle Crunches", "Plank Shoulder Taps", "Box Breathing"]),
             Routine(name: "Breathwork & Calm", routineDescription: "8 min breathing and relaxation.", exerciseNames: ["Belly Breathing", "4-7-8 Breathing", "Resonant Breathing", "Progressive Relaxation"]),
             Routine(name: "Upper Body Strength", routineDescription: "12 min arms, chest, and back.", exerciseNames: ["Push-ups", "Diamond Push-ups", "Triceps Dips", "Plank Shoulder Taps", "Superman Hold", "Arm Circles"]),
-            Routine(name: "Gentle Morning", routineDescription: "10 min low-impact wake-up.", exerciseNames: ["Shoulder Rolls", "Neck Tilts", "Cat-Cow", "Side Reach Stretch", "Hamstring Stretch", "Belly Breathing"])
+            Routine(name: "Gentle Morning", routineDescription: "10 min low-impact wake-up.", exerciseNames: ["Shoulder Rolls", "Neck Tilts", "Cat-Cow", "Side Reach Stretch", "Hamstring Stretch", "Belly Breathing"]),
+
+            // Targeted relief (008)
+            Routine(name: "Frozen Shoulder Relief", routineDescription: "Gentle stretches to free up a locked shoulder.", exerciseNames: ["Pendulum Swing", "Finger Wall Walk", "Cross-Body Arm Stretch", "Towel Stretch", "Outward Rotation Stretch", "Armpit Stretch"]),
+            Routine(name: "Reflux Breathing", routineDescription: "Strengthen your diaphragm to help with reflux.", exerciseNames: ["Seated Diaphragm Breathing", "360° Rib Breathing", "Diaphragm Breathing (Lying)", "Weighted Belly Breathing"]),
+            Routine(name: "Lower Back Relief", routineDescription: "Ease a stiff or sore lower back.", exerciseNames: ["Cat-Cow", "Seated Spinal Twist", "Bird Dog", "Child's Pose", "Figure-4 Stretch", "Belly Breathing"])
         ]
     }
+}
+
+// MARK: - This for That
+
+/// A habit-forming pact: do "This" (an exercise or habit) to earn "That" (a treat).
+/// Per-session pacts bank a treat every `targetCount` completions; weekly pacts bank one
+/// treat per calendar week once "This" is done on `targetCount` different days.
+@Model
+final class ThisForThat {
+    var thisAction: String
+    var thatTreat: String
+    var treatIcon: String = "gift.fill"
+    var timesEarned: Int = 0
+    var timesClaimed: Int = 0
+    var lastEarnedAt: Date?
+    var createdAt: Date = Date()
+
+    var isWeekly: Bool = false
+    var targetCount: Int = 1
+    /// Per-session progress towards the next treat.
+    var sessionProgress: Int = 0
+    var completionDates: [Date] = []
+    /// Start of the week a weekly treat was last awarded, so it's only earned once per week.
+    var rewardedWeekStart: Date?
+
+    init(thisAction: String, thatTreat: String, treatIcon: String = "gift.fill", isWeekly: Bool = false, targetCount: Int = 1) {
+        self.thisAction = thisAction
+        self.thatTreat = thatTreat
+        self.treatIcon = treatIcon
+        self.isWeekly = isWeekly
+        self.targetCount = targetCount
+    }
+
+    /// Treats earned but not yet enjoyed.
+    var bankedTreats: Int { max(timesEarned - timesClaimed, 0) }
+
+    var doneToday: Bool {
+        completionDates.contains { Calendar.current.isDateInToday($0) }
+    }
+
+    static var currentWeek: DateInterval {
+        Calendar.current.dateInterval(of: .weekOfYear, for: Date())
+            ?? DateInterval(start: Calendar.current.startOfDay(for: Date()), duration: 7 * 86_400)
+    }
+
+    /// The seven days of the current week, in the user's locale order.
+    static var currentWeekDays: [Date] {
+        (0..<7).compactMap { Calendar.current.date(byAdding: .day, value: $0, to: currentWeek.start) }
+    }
+
+    /// Distinct days in the current week on which "This" was done.
+    var daysDoneThisWeek: Set<Date> {
+        let week = Self.currentWeek
+        return Set(completionDates.filter { week.contains($0) }.map { Calendar.current.startOfDay(for: $0) })
+    }
+
+    var rewardedThisWeek: Bool {
+        rewardedWeekStart == Self.currentWeek.start
+    }
+
+    /// Progress towards the next treat, as (done, target).
+    var progress: (done: Int, target: Int) {
+        isWeekly ? (min(daysDoneThisWeek.count, targetCount), targetCount) : (sessionProgress, targetCount)
+    }
+
+    var goalLabel: String {
+        if isWeekly {
+            return "\(targetCount) day\(targetCount == 1 ? "" : "s") a week"
+        }
+        return targetCount == 1 ? "Every time" : "Every \(targetCount) times"
+    }
+
+    /// Records a completion. Returns true when this completion earned a treat.
+    @discardableResult
+    func markDone() -> Bool {
+        if isWeekly {
+            guard !doneToday else { return false }
+            completionDates.append(Date())
+            guard !rewardedThisWeek, daysDoneThisWeek.count >= targetCount else { return false }
+            rewardedWeekStart = Self.currentWeek.start
+        } else {
+            completionDates.append(Date())
+            sessionProgress += 1
+            guard sessionProgress >= targetCount else { return false }
+            sessionProgress = 0
+        }
+        timesEarned += 1
+        lastEarnedAt = Date()
+        return true
+    }
+
+    func claimTreat() {
+        guard bankedTreats > 0 else { return }
+        timesClaimed += 1
+    }
+
+    /// SF Symbols offered when picking a treat icon.
+    static let treatIcons = [
+        "gift.fill", "birthday.cake.fill", "cup.and.saucer.fill", "mug.fill", "takeoutbag.and.cup.and.straw.fill",
+        "fork.knife", "wineglass.fill", "tv.fill", "gamecontroller.fill", "music.note",
+        "book.fill", "bag.fill", "bed.double.fill", "sparkles",
+    ]
 }
