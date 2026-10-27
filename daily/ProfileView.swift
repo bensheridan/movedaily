@@ -175,6 +175,10 @@ struct ProfileView: View {
                     }
                 }
             }
+
+            Divider()
+
+            HealthNotice(text: HealthDisclaimer.full)
         }
         .padding(DesignTokens.cardPadding)
         .cardStyle()

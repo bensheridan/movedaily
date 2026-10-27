@@ -153,6 +153,10 @@ struct RoutineDetailView: View {
                     .foregroundStyle(.blue)
                     .padding(.top, 2)
             }
+            if routine.isFocusProgram {
+                HealthNotice(text: HealthDisclaimer.focusProgram)
+                    .padding(.top, 6)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(DesignTokens.cardPadding)

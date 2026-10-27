@@ -1,11 +1,11 @@
 # iPhone Duo screenshots
 
 Captured on the iPhone Duo simulator (iOS 27.1). The unfolded inner screen is 951×669 pt
-(2853×2007 px); the folded cover screen is 466×678 pt (1398×2034 px).
+(2853×2007 px). The folded cover screen (466×678 pt, 1398×2034 px) uses the same layout as
+any iPhone.
 
 | File | Screen |
 | --- | --- |
-| `00-dashboard-folded.png` | Dashboard on the cover screen (same layout as any iPhone) |
 | `01-dashboard-unfolded.png` | Dashboard, two columns |
 | `02-program-unfolded.png` | Program: exercise list beside "Up next" |
 | `03-exercise-timer-unfolded.png` | Exercise timer beside instructions |
