@@ -175,16 +175,51 @@ struct ProgramsListView: View {
     var routineCompleted: (() -> Void)? = nil
 
     @Query private var routines: [Routine]
+    @Environment(\.isUnfolded) private var isUnfolded
+    @State private var selectedName: String?
 
     private var sorted: [Routine] { Routine.sortedForDisplay(routines) }
 
+    private var selectedRoutine: Routine? {
+        sorted.first { $0.name == selectedName } ?? sorted.first
+    }
+
     var body: some View {
-        List {
-            section("Targeted relief", routines: sorted.filter(\.isReliefProgram))
-            section("Workouts & routines", routines: sorted.filter { !$0.isReliefProgram })
+        Group {
+            if isUnfolded {
+                // Inner screen: program list beside the selected program.
+                SideBySide {
+                    List(selection: $selectedName) { sections }
+                } trailing: {
+                    if let routine = selectedRoutine {
+                        detail(for: routine)
+                            .id(routine.name)
+                            // The detail pane is phone-width, so it keeps its single-column layout.
+                            .environment(\.isUnfolded, false)
+                    }
+                }
+                .onAppear { if selectedName == nil { selectedName = sorted.first?.name } }
+            } else {
+                List { sections }
+            }
         }
         .navigationTitle("Programs")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    @ViewBuilder
+    private var sections: some View {
+        section("Targeted relief", routines: sorted.filter(\.isReliefProgram))
+        section("Workouts & routines", routines: sorted.filter { !$0.isReliefProgram })
+    }
+
+    private func detail(for routine: Routine) -> RoutineDetailView {
+        RoutineDetailView(
+            routine: routine,
+            allExercises: allExercises,
+            profile: profile,
+            routineCompleted: routineCompleted
+        )
     }
 
     @ViewBuilder
@@ -192,33 +227,43 @@ struct ProgramsListView: View {
         if !routines.isEmpty {
             Section(title) {
                 ForEach(routines) { routine in
-                    NavigationLink(destination: RoutineDetailView(
-                        routine: routine,
-                        allExercises: allExercises,
-                        profile: profile,
-                        routineCompleted: routineCompleted
-                    )) {
-                        HStack(spacing: 14) {
-                            Image(systemName: routine.programIcon)
-                                .font(.title3)
-                                .foregroundStyle(.white)
-                                .frame(width: 40, height: 40)
-                                .background(routine.programColor.gradient)
-                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text(routine.name)
-                                    .font(.headline)
-                                Text(routine.routineDescription)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                ProgramMetaLabel(exercises: routine.programExercises(from: allExercises, profile: profile))
-                            }
+                    if isUnfolded {
+                        ProgramRow(routine: routine, allExercises: allExercises, profile: profile)
+                            .tag(routine.name)
+                    } else {
+                        NavigationLink(destination: detail(for: routine)) {
+                            ProgramRow(routine: routine, allExercises: allExercises, profile: profile)
                         }
-                        .padding(.vertical, 4)
                     }
                 }
             }
         }
+    }
+}
+
+struct ProgramRow: View {
+    let routine: Routine
+    let allExercises: [Exercise]
+    let profile: UserProfile?
+
+    var body: some View {
+        HStack(spacing: 14) {
+            Image(systemName: routine.programIcon)
+                .font(.title3)
+                .foregroundStyle(.white)
+                .frame(width: 40, height: 40)
+                .background(routine.programColor.gradient)
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            VStack(alignment: .leading, spacing: 3) {
+                Text(routine.name)
+                    .font(.headline)
+                Text(routine.routineDescription)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                ProgramMetaLabel(exercises: routine.programExercises(from: allExercises, profile: profile))
+            }
+        }
+        .padding(.vertical, 4)
     }
 }
 
@@ -237,6 +282,16 @@ struct ProgramsListView: View {
         }
     }
     .modelContainer(container)
+}
+
+#Preview("Program Row") {
+    List {
+        ProgramRow(
+            routine: Routine(name: "Frozen Shoulder Relief", routineDescription: "Gentle mobility for a stiff shoulder", exerciseNames: []),
+            allExercises: [],
+            profile: nil
+        )
+    }
 }
 
 #Preview("All Programs") {
